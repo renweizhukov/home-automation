@@ -25,12 +25,12 @@ The script uses Google Apps Script Properties for configuration:
 - `DAUGHTER_EMAIL`: Primary recipient email address (required)
 - `DADA_EMAIL`: Additional recipient email address (required)
 - `DAUGHTER_NAME`: Name to personalize the email greeting (optional)
-- `NEWS_RSS_URLS`: JSON array string of RSS feed URLs, e.g. `["https://feeds.bbci.co.uk/news/world/rss.xml"]` (required)
+- `NEWS_RSS_URLS`: JSON array string of RSS feed URLs, e.g. `["https://feeds.npr.org/1004/rss.xml"]` (required)
 - `GOOGLE_BOOKS_API_KEY`: Google Books API key (optional, but recommended)
 
 #### Setup Notes
 - The script includes `country=US` parameter in Google Books API requests to avoid location-related errors
-- RSS feed URLs can be from any source (e.g., BBC, Reuters, Google News). Example: `["https://feeds.bbci.co.uk/news/world/rss.xml"]`
+- RSS feed URLs can be from any source (e.g., NPR, BBC, Reuters, Google News). Example: `["https://feeds.npr.org/1004/rss.xml"]`
 - **Application restrictions**: Set to "None" (Apps Script doesn't have stable IPs)
 - **API restrictions**: Restrict to "Google Books API" only
 - The script filters news content using a deny list (shooting, killed, dead, murder, etc.) to ensure age-appropriate content
