@@ -128,18 +128,37 @@ function getNewsItems_(rssUrls, limit) {
 }
 
 function getPopularKidsBooks_(limit, apiKey) {
-  // “Popular” is subjective; this uses a pragmatic query and returns relevance-ranked results.
-  // You can tune query terms (age 8–10, children’s fiction, etc.).
-  const q = encodeURIComponent('subject:"juvenile fiction"');
-  const maxResults = Math.min(Math.max(limit, 5), 20);
-
-let url =
+  // Randomize results by:
+  // 1. Fetching more books than needed (3-4x the limit)
+  // 2. Optionally varying query terms for diversity
+  // 3. Randomly shuffling and selecting the requested number
+  
+  const fetchMultiplier = 4; // Fetch 4x the limit to have more options
+  const maxResults = Math.min(Math.max(limit * fetchMultiplier, 20), 40);
+  
+  // Vary query terms for more diversity (randomly select one)
+  const queryVariants = [
+    'subject:"juvenile fiction"',
+    'subject:"children\'s fiction"',
+    'subject:"juvenile fiction" subject:"adventure"',
+    'subject:"juvenile fiction" subject:"fantasy"',
+    'subject:"children\'s books"',
+    'subject:"juvenile fiction" inauthor:"rowling" OR inauthor:"dahl" OR inauthor:"cleary"'
+  ];
+  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+  const q = encodeURIComponent(randomQuery);
+  
+  // Optionally use random startIndex to get different pages (0-10)
+  const randomStart = Math.floor(Math.random() * 11);
+  
+  let url =
     `https://www.googleapis.com/books/v1/volumes` +
     `?q=${q}` +
     `&maxResults=${maxResults}` +
+    `&startIndex=${randomStart}` +
     `&printType=books` +
     `&langRestrict=en` +
-    `&country=US`; // <-- ADD THIS
+    `&country=US`;
 
   if (apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
 
@@ -149,7 +168,7 @@ let url =
   }
 
   const data = JSON.parse(resp.getContentText("UTF-8"));
-  const out = [];
+  const allBooks = [];
 
   for (const item of (data.items || [])) {
     const v = item.volumeInfo || {};
@@ -160,17 +179,27 @@ let url =
 
     if (!title || !link) continue;
 
-    out.push({
+    allBooks.push({
       title,
       authors,
       link,
       blurb: truncate_(description, 220)
     });
-
-    if (out.length >= limit) break;
   }
 
-  return out;
+  // Randomly shuffle and select the requested number
+  const shuffled = shuffleArray_(allBooks);
+  return shuffled.slice(0, limit);
+}
+
+function shuffleArray_(array) {
+  // Fisher-Yates shuffle algorithm
+  const shuffled = array.slice(); // Create a copy
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 function renderEmailHtml_(daughterName, news, books, errors) {
@@ -211,7 +240,7 @@ function renderEmailHtml_(daughterName, news, books, errors) {
 
 function renderEmailText_(daughterName, news, books, errors) {
   const lines = [];
-  lines.push("Hi ${daughterName}! Here are today’s updates.\n");
+  lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
 
   lines.push("Top World News:");
   if (news.length) {
