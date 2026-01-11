@@ -168,6 +168,18 @@ function getPopularKidsBooks_(limit, apiKey) {
   }
 
   const data = JSON.parse(resp.getContentText("UTF-8"));
+  const apiItemsCount = data.items ? data.items.length : 0;
+  const apiTotalItems = data.totalItems || 0;
+  
+  console.log(JSON.stringify({
+    event: "books_api_response",
+    apiItemsCount,
+    apiTotalItems,
+    query: randomQuery,
+    startIndex: randomStart,
+    maxResults
+  }));
+  
   const allBooks = [];
 
   for (const item of (data.items || [])) {
@@ -187,8 +199,20 @@ function getPopularKidsBooks_(limit, apiKey) {
     });
   }
 
+  console.log(JSON.stringify({
+    event: "books_before_shuffle",
+    count: allBooks.length
+  }));
+
   // Randomly shuffle and select the requested number
   const shuffled = shuffleArray_(allBooks);
+  
+  console.log(JSON.stringify({
+    event: "books_after_shuffle",
+    count: shuffled.length,
+    limit
+  }));
+  
   return shuffled.slice(0, limit);
 }
 
