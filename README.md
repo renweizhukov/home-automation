@@ -37,3 +37,37 @@ The script uses Google Apps Script Properties for configuration:
 - News items are limited to the last 48 hours and sorted by newest first
 
 The script is located in the `DailyKidsEmail/` folder.
+
+#### Syncing with Google Apps Script
+
+This project uses [clasp](https://github.com/google/clasp) to sync local changes to Google Apps Script.
+
+**Prerequisites:**
+1. Install Node.js and npm (if not already installed)
+2. Install clasp globally: `npm install -g @google/clasp`
+3. Enable Google Apps Script API:
+   - Go to https://script.google.com/home/usersettings
+   - Turn on "Google Apps Script API"
+
+**First-time setup:**
+1. Navigate to the project directory:
+   ```bash
+   cd DailyKidsEmail
+   ```
+2. Login to clasp (opens browser for authentication):
+   ```bash
+   clasp login
+   ```
+3. The project is already configured with `.clasp.json`, so you're ready to push!
+
+**Pushing changes to Google Apps Script:**
+```bash
+clasp push
+```
+
+**Pulling changes from Google Apps Script:**
+```bash
+clasp pull
+```
+
+**Note:** The `.clasp.json` file contains the script ID and should be committed to the repository. The `.clasprc.json` file (created by `clasp login`) contains authentication tokens and should be in `.gitignore`.
