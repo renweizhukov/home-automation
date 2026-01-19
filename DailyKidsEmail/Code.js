@@ -142,8 +142,7 @@ function getPopularKidsBooks_(limit, apiKey) {
     'subject:"children\'s fiction"',
     'subject:"juvenile fiction" subject:"adventure"',
     'subject:"juvenile fiction" subject:"fantasy"',
-    'subject:"children\'s books"',
-    'subject:"juvenile fiction" inauthor:"rowling" OR inauthor:"dahl" OR inauthor:"cleary"'
+    'subject:"children\'s books"'
   ];
   const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
   const q = encodeURIComponent(randomQuery);
