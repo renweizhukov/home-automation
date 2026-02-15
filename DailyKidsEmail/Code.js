@@ -5,7 +5,39 @@
  * - DAUGHTER_EMAIL: recipient email
  * - NEWS_RSS_URLS: JSON array string, e.g. ["https://feeds.bbci.co.uk/news/world/rss.xml"]
  * - GOOGLE_BOOKS_API_KEY: (optional) Google Books API key
+ * - KCLS_CHINESE_KIDS_LIST_URLS: (optional) JSON array of fixed KCLS Chinese kids list URLs
+ * - CHINESE_KIDS_AWARD_URLS: (optional) JSON array of official award/list URLs for curated Chinese kids books
  */
+
+const DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS = [
+  "https://kcls.bibliocommons.com/v2/list/display/209392283/1188591387"
+];
+
+const DEFAULT_CHINESE_KIDS_AWARD_URLS = [
+  "https://www.chinawriter.com.cn/n1/2025/0725/c403937-40529641.html"
+];
+
+const DEFAULT_CURATED_CHINESE_KIDS_TITLES = [
+  // From the 12th National Outstanding Children's Literature Award (official list, 2025)
+  "我人生最开始的好朋友",
+  "大河的歌谣",
+  "万花筒",
+  "方一禾，快跑",
+  "狼洞的外婆",
+  "额吉的河",
+  "胡同也有小时候",
+  "我知道所有问题的答案了",
+  "外婆变成了麻猫",
+  "器成千年",
+  "白夜梦想家",
+  "月光蟋蟀",
+  "我的，我的",
+  "改造天才",
+  "火苗照亮宇宙：暗生命传奇",
+  "不能没有",
+  "妈妈的剪影",
+  "守护神"
+];
 
 function dailyJob() {
   const cfg = getConfig_();
@@ -28,7 +60,12 @@ function dailyJob() {
   }
 
   try {
-    chineseBooks = getPopularChineseKidsBooks_(5, cfg.googleBooksApiKey);
+    chineseBooks = getPopularChineseKidsBooks_(
+      5,
+      cfg.googleBooksApiKey,
+      cfg.kclsChineseKidsListUrls,
+      cfg.chineseKidsAwardUrls
+    );
   } catch (e) {
     errors.push(`Chinese books fetch failed: ${e.message || e}`);
   }
@@ -67,12 +104,34 @@ function getConfig_() {
   }
 
   const googleBooksApiKey = props.getProperty("GOOGLE_BOOKS_API_KEY") || "";
+  const kclsListUrlsRaw = props.getProperty("KCLS_CHINESE_KIDS_LIST_URLS");
+  const awardUrlsRaw = props.getProperty("CHINESE_KIDS_AWARD_URLS");
+  let kclsChineseKidsListUrls = DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS;
+  if (kclsListUrlsRaw) {
+    try {
+      const parsed = JSON.parse(kclsListUrlsRaw);
+      if (Array.isArray(parsed) && parsed.length) kclsChineseKidsListUrls = parsed;
+    } catch (e) {
+      console.log(`Invalid KCLS_CHINESE_KIDS_LIST_URLS, using default list: ${e.message || e}`);
+    }
+  }
+  let chineseKidsAwardUrls = DEFAULT_CHINESE_KIDS_AWARD_URLS;
+  if (awardUrlsRaw) {
+    try {
+      const parsed = JSON.parse(awardUrlsRaw);
+      if (Array.isArray(parsed) && parsed.length) chineseKidsAwardUrls = parsed;
+    } catch (e) {
+      console.log(`Invalid CHINESE_KIDS_AWARD_URLS, using default list: ${e.message || e}`);
+    }
+  }
 
   return {
     recipients: [daughterEmail, dadaEmail].join(","), // GmailApp supports comma-separated list
     daughterName,
     newsRssUrls,
-    googleBooksApiKey
+    googleBooksApiKey,
+    kclsChineseKidsListUrls,
+    chineseKidsAwardUrls
   };
 }
 
@@ -223,45 +282,176 @@ function getPopularKidsBooks_(limit, apiKey) {
   return shuffled.slice(0, limit);
 }
 
-function getPopularChineseKidsBooks_(limit, apiKey) {
-  // Prefer Google Books for consistency with the existing pipeline.
-  // If results look weak, supplement with Open Library as fallback.
+function getPopularChineseKidsBooks_(limit, apiKey, kclsListUrls, awardUrls) {
+  // Hybrid strategy:
+  // 1) Fixed KCLS list URLs (preferred)
+  // 2) Curated picks from official award/list sources
+  // 3) Open Library discovery for additional variety
+  // 4) Google Books as last fallback
   const fetchMultiplier = 4;
   const maxResults = Math.min(Math.max(limit * fetchMultiplier, 20), 40);
 
-  const queryVariants = [
-    'subject:"Children\'s stories, Chinese"',
-    'subject:"juvenile fiction" 儿童文学',
-    '儿童文学',
-    '少儿故事',
-    '儿童小说'
-  ];
-  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
-  const randomStart = Math.floor(Math.random() * 11);
-
-  const googleBooks = getGoogleBooks_(randomQuery, "zh", "US", maxResults, randomStart, apiKey)
-    .filter(b => isLikelyChineseBook_(b))
-    .filter(b => !denyHit_(`${b.title} ${b.blurb || ""}`, ["言情", "成人", "耽美", "色情", "恐怖"]));
+  const kclsBooks = getKclsChineseKidsBooks_(kclsListUrls || DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS, maxResults);
+  const curatedBooks = getCuratedChineseKidsBooks_(awardUrls || DEFAULT_CHINESE_KIDS_AWARD_URLS, maxResults);
+  const openLibraryBooks = getOpenLibraryChineseKidsBooks_(maxResults);
 
   console.log(JSON.stringify({
-    event: "chinese_books_google",
-    query: randomQuery,
-    startIndex: randomStart,
-    maxResults,
-    googleCount: googleBooks.length
+    event: "chinese_books_hybrid_primary",
+    kclsCount: kclsBooks.length,
+    curatedCount: curatedBooks.length,
+    openLibraryCount: openLibraryBooks.length
   }));
 
-  let merged = googleBooks;
+  let merged = dedupeBooks_(
+    shuffleArray_(kclsBooks)
+      .concat(shuffleArray_(curatedBooks))
+      .concat(shuffleArray_(openLibraryBooks))
+  );
+
+  let googleBooks = [];
   if (merged.length < limit) {
-    const fallback = getOpenLibraryChineseKidsBooks_(maxResults);
+    const queryVariants = [
+      'subject:"Children\'s stories, Chinese"',
+      'subject:"juvenile fiction" 儿童文学',
+      '儿童文学',
+      '少儿故事',
+      '儿童小说'
+    ];
+    const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+    const randomStart = Math.floor(Math.random() * 11);
+
+    googleBooks = getGoogleBooks_(randomQuery, "zh", "US", maxResults, randomStart, apiKey);
+
     console.log(JSON.stringify({
-      event: "chinese_books_openlibrary_fallback",
-      fallbackCount: fallback.length
+      event: "chinese_books_google",
+      query: randomQuery,
+      startIndex: randomStart,
+      maxResults,
+      googleCount: googleBooks.length
     }));
-    merged = dedupeBooks_(merged.concat(fallback));
+
+    merged = dedupeBooks_(merged.concat(shuffleArray_(googleBooks)));
   }
 
-  return shuffleArray_(merged).slice(0, limit);
+  const filtered = filterChineseKidsBooks_(merged);
+  const ranked = rankChineseKidsBooks_(filtered);
+  return ranked.slice(0, limit);
+}
+
+function getKclsChineseKidsBooks_(listUrls, maxResults) {
+  const books = [];
+  const urls = (listUrls || []).slice(0, 8); // avoid too many network calls
+
+  for (const url of urls) {
+    try {
+      const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      if (resp.getResponseCode() >= 400) continue;
+
+      const html = resp.getContentText("UTF-8");
+      const extracted = extractKclsRecordBooks_(html);
+      extracted.forEach(b => books.push({
+        title: b.title,
+        authors: b.authors || "",
+        link: b.link,
+        blurb: "From KCLS Chinese kids list"
+      }));
+    } catch (e) {
+      console.log(`KCLS list fetch failed for ${url}: ${e.message || e}`);
+    }
+  }
+
+  return dedupeBooks_(books).slice(0, maxResults);
+}
+
+function extractKclsRecordBooks_(html) {
+  const books = [];
+  const seenLinks = new Set();
+  const linkAndTitleRe = /<a[^>]+href="([^"]*(?:\/v2\/record\/S82C\d+|\/item\/show\/\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let m;
+  while ((m = linkAndTitleRe.exec(html)) !== null) {
+    let link = safeText_(m[1]);
+    if (!link) continue;
+    if (!/^https?:\/\//i.test(link)) {
+      link = `https://kcls.bibliocommons.com${link.startsWith("/") ? "" : "/"}${link}`;
+    }
+    if (seenLinks.has(link)) continue;
+    seenLinks.add(link);
+
+    const anchorTag = m[0];
+    const ariaMatch = /aria-label="([^"]+)"/i.exec(anchorTag);
+    const textTitle = decodeHtmlEntities_(stripHtmlTags_(m[2]));
+    const ariaTitle = ariaMatch ? decodeHtmlEntities_(safeText_(ariaMatch[1])) : "";
+    const title = safeText_(textTitle || ariaTitle);
+
+    if (!title || title.length > 180) continue;
+    books.push({ title, authors: "", link, blurb: "" });
+  }
+  return books;
+}
+
+function getCuratedChineseKidsBooks_(awardUrls, maxResults) {
+  const books = [];
+  const urls = (awardUrls || []).slice(0, 8); // avoid too many network calls
+
+  for (const url of urls) {
+    try {
+      const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      if (resp.getResponseCode() >= 400) continue;
+
+      const html = resp.getContentText("UTF-8");
+      const titles = extractChineseBracketTitles_(html);
+
+      for (const title of titles) {
+        books.push({
+          title,
+          authors: "",
+          link: url,
+          blurb: "Curated from official Chinese children's literature award/list source"
+        });
+      }
+    } catch (e) {
+      console.log(`Curated source fetch failed for ${url}: ${e.message || e}`);
+    }
+  }
+
+  // If source pages change format or extraction is weak, use a curated safety set.
+  if (books.length < 6) {
+    DEFAULT_CURATED_CHINESE_KIDS_TITLES.forEach(t => books.push({
+      title: t,
+      authors: "",
+      link: urls[0] || "https://www.chinawriter.com.cn",
+      blurb: "Curated classic Chinese kids book"
+    }));
+  }
+
+  return dedupeBooks_(books).slice(0, maxResults);
+}
+
+function extractChineseBracketTitles_(html) {
+  const stopWords = [
+    "全国优秀儿童文学奖",
+    "中国作家协会",
+    "评奖",
+    "名单",
+    "奖项",
+    "委员会",
+    "通知",
+    "文学奖",
+    "获奖",
+    "作品",
+    "图书"
+  ];
+  const titles = [];
+  const re = /《([^《》\r\n]{2,40})》/g;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const title = safeText_(m[1]);
+    if (!title) continue;
+    if (stopWords.some(w => title.includes(w))) continue;
+    if (/第[一二三四五六七八九十0-9]+/.test(title)) continue;
+    titles.push(title);
+  }
+  return dedupeStrings_(titles);
 }
 
 function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, apiKey) {
@@ -304,43 +494,77 @@ function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, a
 }
 
 function getOpenLibraryChineseKidsBooks_(maxResults) {
-  const queryVariants = ["儿童文学", "少儿故事", "童话", "少年小说"];
-  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
-  const url =
-    `https://openlibrary.org/search.json` +
-    `?q=${encodeURIComponent(randomQuery)}` +
-    `&language=chi` +
-    `&limit=${Math.min(Math.max(maxResults, 20), 50)}`;
-
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-  if (resp.getResponseCode() >= 400) {
-    throw new Error(`Open Library error ${resp.getResponseCode()}: ${resp.getContentText()}`);
-  }
-
-  const data = JSON.parse(resp.getContentText("UTF-8"));
   const books = [];
-  for (const d of (data.docs || [])) {
-    const title = safeText_(d.title);
-    if (!title) continue;
+  const queries = [
+    "subject:\"Children's stories, Chinese\"",
+    "儿童文学",
+    "少儿故事"
+  ];
 
-    const authors = (d.author_name || []).slice(0, 2).join(", ");
-    const link = d.key ? `https://openlibrary.org${d.key}` : "";
-    if (!link) continue;
+  for (const q of queries) {
+    const url =
+      `https://openlibrary.org/search.json` +
+      `?q=${encodeURIComponent(q)}` +
+      `&language=chi` +
+      `&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`;
 
-    books.push({
-      title,
-      authors,
-      link,
-      blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
-    });
+    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (resp.getResponseCode() >= 400) continue;
+
+    const data = JSON.parse(resp.getContentText("UTF-8"));
+    for (const d of (data.docs || [])) {
+      const title = safeText_(d.title);
+      if (!title) continue;
+
+      const authors = (d.author_name || []).slice(0, 2).join(", ");
+      const link = d.key ? `https://openlibrary.org${d.key}` : "";
+      if (!link) continue;
+
+      books.push({
+        title,
+        authors,
+        link,
+        blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
+      });
+    }
   }
 
-  return books.filter(b => isLikelyChineseBook_(b));
+  return dedupeBooks_(books);
 }
 
 function isLikelyChineseBook_(book) {
   const haystack = `${book.title || ""} ${book.authors || ""} ${book.blurb || ""}`;
   return /[\u3400-\u9FFF]/.test(haystack);
+}
+
+function filterChineseKidsBooks_(books) {
+  const deny = ["言情", "成人", "耽美", "色情", "恐怖", "犯罪", "悬疑", "杀人", "谋杀"];
+  return books.filter(b => {
+    const fromKcls = (b.link || "").includes("kcls.bibliocommons.com");
+    if (!isLikelyChineseBook_(b) && !fromKcls) return false;
+    const haystack = `${b.title || ""} ${b.blurb || ""}`.toLowerCase();
+    if (denyHit_(haystack, deny)) return false;
+    return true;
+  });
+}
+
+function rankChineseKidsBooks_(books) {
+  const kidSignals = ["儿童", "少儿", "童话", "少年", "小学生", "图画书", "绘本", "成长", "校园", "故事"];
+  return books
+    .map(b => {
+      const text = `${b.title || ""} ${b.blurb || ""}`.toLowerCase();
+      let score = 0;
+      if ((b.link || "").includes("kcls.bibliocommons.com")) score += 6;
+      if ((b.link || "").includes("chinawriter.com.cn")) score += 4;
+      if ((b.link || "").includes("openlibrary.org")) score += 2;
+      kidSignals.forEach(k => {
+        if (text.includes(k)) score += 1;
+      });
+      if (/[\u3400-\u9FFF]/.test(b.title || "")) score += 2;
+      return { book: b, score, tie: Math.random() };
+    })
+    .sort((a, b) => (b.score - a.score) || (a.tie - b.tie))
+    .map(x => x.book);
 }
 
 function dedupeBooks_(books) {
@@ -353,6 +577,34 @@ function dedupeBooks_(books) {
     out.push(b);
   }
   return out;
+}
+
+function dedupeStrings_(arr) {
+  const seen = new Set();
+  const out = [];
+  for (const s of arr) {
+    const key = (s || "").toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out;
+}
+
+function stripHtmlTags_(s) {
+  return safeText_((s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " "));
+}
+
+function decodeHtmlEntities_(s) {
+  return (s || "")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&#([0-9]+);/g, (_, d) => String.fromCharCode(parseInt(d, 10)))
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
 }
 
 function shuffleArray_(array) {
@@ -443,7 +695,7 @@ function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors
     });
   } else {
     lines.push("(No Chinese book items available today.)");
-  }
+   }
 
   lines.push("\nQuestion of the day: Which story sounds the most interesting, and why?");
 
