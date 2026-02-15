@@ -5,6 +5,11 @@
  * - DAUGHTER_EMAIL: recipient email
  * - NEWS_RSS_URLS: JSON array string, e.g. ["https://feeds.bbci.co.uk/news/world/rss.xml"]
  * - GOOGLE_BOOKS_API_KEY: (optional) Google Books API key
+ * - OPENAI_API_KEY: (optional) OpenAI API key for podcast audio generation
+ * - PODCAST_ENABLED: (optional) true/false. Default true when OPENAI_API_KEY is set
+ * - PODCAST_OPENAI_MODEL: (optional) default "gpt-4o-mini-tts"
+ * - PODCAST_OPENAI_VOICE: (optional) default "coral"
+ * - PODCAST_OPENAI_INSTRUCTIONS: (optional) speaking style guidance
  * - KCLS_CHINESE_KIDS_LIST_URLS: (optional) JSON array of fixed KCLS Chinese kids list URLs
  * - CHINESE_KIDS_AWARD_URLS: (optional) JSON array of official award/list URLs for curated Chinese kids books
  */
@@ -70,11 +75,49 @@ function dailyJob() {
     errors.push(`Chinese books fetch failed: ${e.message || e}`);
   }
 
-  const subject = `Daily News + Books for JoJo (${formatDate_ (new Date())})`;
-  const html = renderEmailHtml_(cfg.daughterName, news, englishBooks, chineseBooks, errors);
-  const text = renderEmailText_(cfg.daughterName, news, englishBooks, chineseBooks, errors);
+  let podcast = null;
+  if (cfg.podcastEnabled) {
+    try {
+      console.log(JSON.stringify({
+        event: "podcast_generation_started",
+        date: new Date().toISOString(),
+        model: cfg.podcastOpenAiModel,
+        voice: cfg.podcastOpenAiVoice
+      }));
 
-  GmailApp.sendEmail(cfg.recipients, subject, text, { htmlBody: html });
+      podcast = createDailyPodcast_(
+        cfg.daughterName,
+        news,
+        englishBooks,
+        chineseBooks,
+        errors,
+        cfg.openAiApiKey,
+        cfg.podcastOpenAiModel,
+        cfg.podcastOpenAiVoice,
+        cfg.podcastOpenAiInstructions
+      );
+
+      console.log(JSON.stringify({
+        event: "podcast_generation_succeeded",
+        date: new Date().toISOString(),
+        fileName: podcast.fileName,
+        sizeBytes: podcast.audioBlob ? podcast.audioBlob.getBytes().length : 0
+      }));
+    } catch (e) {
+      errors.push(`Podcast generation failed: ${e.message || e}`);
+    }
+  }
+
+  const subject = `Daily News + Books for JoJo (${formatDate_ (new Date())})`;
+  const html = renderEmailHtml_(cfg.daughterName, news, englishBooks, chineseBooks, errors, podcast);
+  const text = renderEmailText_(cfg.daughterName, news, englishBooks, chineseBooks, errors, podcast);
+
+  const mailOpts = { htmlBody: html };
+  if (podcast && podcast.audioBlob) {
+    mailOpts.attachments = [podcast.audioBlob];
+  }
+
+  GmailApp.sendEmail(cfg.recipients, subject, text, mailOpts);
 
   console.log(JSON.stringify({
     event: "dailyJob_sent",
@@ -82,6 +125,7 @@ function dailyJob() {
     newsCount: news.length,
     englishBookCount: englishBooks.length,
     chineseBookCount: chineseBooks.length,
+    podcastGenerated: !!podcast,
     errors
   }));
 }
@@ -104,6 +148,14 @@ function getConfig_() {
   }
 
   const googleBooksApiKey = props.getProperty("GOOGLE_BOOKS_API_KEY") || "";
+  const openAiApiKey = props.getProperty("OPENAI_API_KEY") || "";
+  const podcastEnabledRaw = props.getProperty("PODCAST_ENABLED");
+  const podcastEnabled = podcastEnabledRaw
+    ? podcastEnabledRaw.toLowerCase() === "true"
+    : !!openAiApiKey;
+  const podcastOpenAiModel = props.getProperty("PODCAST_OPENAI_MODEL") || "gpt-4o-mini-tts";
+  const podcastOpenAiVoice = props.getProperty("PODCAST_OPENAI_VOICE") || "coral";
+  const podcastOpenAiInstructions = props.getProperty("PODCAST_OPENAI_INSTRUCTIONS") || "Warm, upbeat, youthful girl narrator voice, clear pacing for kids.";
   const kclsListUrlsRaw = props.getProperty("KCLS_CHINESE_KIDS_LIST_URLS");
   const awardUrlsRaw = props.getProperty("CHINESE_KIDS_AWARD_URLS");
   let kclsChineseKidsListUrls = DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS;
@@ -130,6 +182,11 @@ function getConfig_() {
     daughterName,
     newsRssUrls,
     googleBooksApiKey,
+    openAiApiKey,
+    podcastEnabled,
+    podcastOpenAiModel,
+    podcastOpenAiVoice,
+    podcastOpenAiInstructions,
     kclsChineseKidsListUrls,
     chineseKidsAwardUrls
   };
@@ -666,8 +723,102 @@ function shuffleArray_(array) {
   return shuffled;
 }
 
-function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors) {
+function createDailyPodcast_(daughterName, news, englishBooks, chineseBooks, errors, openAiApiKey, model, voice, instructions) {
+  if (!openAiApiKey) {
+    throw new Error("Missing Script Property: OPENAI_API_KEY");
+  }
+  const script = buildDailyPodcastScript_(daughterName, news, englishBooks, chineseBooks, errors);
+  const fileName = `daily-kids-podcast-${formatDate_(new Date())}.mp3`;
+  const audioBlob = synthesizeSpeechWithOpenAi_(script, openAiApiKey, model, voice, instructions, fileName);
+  return { fileName, script, audioBlob };
+}
+
+function buildDailyPodcastScript_(daughterName, news, englishBooks, chineseBooks, errors) {
+  const name = safeText_(daughterName) || "friend";
+  const intro = `Hi ${name}! Here is your three minute Daily News and Books podcast.`;
+
+  const newsLines = news.map((n, i) =>
+    `World news ${i + 1}: ${normalizeForSpeech_(n.title)}.`
+  );
+  if (!newsLines.length) newsLines.push("Today there are no world news highlights available.");
+
+  const englishBookLines = englishBooks.map((b, i) => {
+    const authorPart = b.authors ? ` by ${normalizeForSpeech_(b.authors)}` : "";
+    return `English book ${i + 1}: ${normalizeForSpeech_(b.title)}${authorPart}.`;
+  });
+  if (!englishBookLines.length) englishBookLines.push("No English book picks are available today.");
+
+  const chineseBookLines = chineseBooks.map((b, i) => {
+    const authorPart = b.authors ? ` by ${normalizeForSpeech_(b.authors)}` : "";
+    return `Chinese book ${i + 1}: ${normalizeForSpeech_(b.title)}${authorPart}.`;
+  });
+  if (!chineseBookLines.length) chineseBookLines.push("No Chinese book picks are available today.");
+
+  const errLine = errors.length
+    ? "A quick note: some sources had temporary issues today."
+    : "";
+
+  const outro = "Question of the day: Which story sounds the most interesting, and why? Thanks for listening.";
+
+  const script = [
+    intro,
+    "First, top world news.",
+    newsLines.join(" "),
+    "Now, popular kids books in English.",
+    englishBookLines.join(" "),
+    "And now, popular kids books in Chinese.",
+    chineseBookLines.join(" "),
+    errLine,
+    outro
+  ].filter(Boolean).join(" ");
+
+  return trimWords_(script, 900);
+}
+
+function normalizeForSpeech_(s) {
+  return safeText_(s)
+    .replace(/https?:\/\/\S+/gi, "")
+    .replace(/[|_*#`~^<>[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function trimWords_(text, maxWords) {
+  const words = safeText_(text).split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return words.join(" ");
+  return `${words.slice(0, maxWords).join(" ")} Thanks for listening.`;
+}
+
+function synthesizeSpeechWithOpenAi_(text, apiKey, model, voice, instructions, fileName) {
+  const url = "https://api.openai.com/v1/audio/speech";
+  const payload = {
+    model: model || "gpt-4o-mini-tts",
+    voice: voice || "alloy",
+    input: text,
+    response_format: "mp3"
+  };
+  if (instructions) payload.instructions = instructions;
+
+  const resp = UrlFetchApp.fetch(url, {
+    method: "post",
+    contentType: "application/json",
+    headers: {
+      Authorization: `Bearer ${apiKey}`
+    },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() >= 400) {
+    throw new Error(`OpenAI audio.speech error ${resp.getResponseCode()}: ${resp.getContentText()}`);
+  }
+  return resp.getBlob().setName(fileName).setContentType("audio/mpeg");
+}
+
+function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors, podcast) {
   const intro = `Hi ${daughterName}! Here are today’s updates.`;
+  const podcastHtml = podcast
+    ? `<p><b>&#x1F3A7; 3-Min Podcast:</b> Audio attached as <b>${escapeHtml_(podcast.fileName)}</b>.<br><span style="color:#555;">Preview: ${escapeHtml_(truncate_(podcast.script, 240))}</span></p>`
+    : "";
 
   const newsHtml = news.length
     ? `<ol>${news.map(n => `<li><a href="${escapeHtml_(n.link)}">${escapeHtml_(n.title)}</a></li>`).join("")}</ol>`
@@ -696,6 +847,7 @@ function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors
   return `
     <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.4;">
       <p>${intro}</p>
+      ${podcastHtml}
 
       <h3>&#x1F4F0; Top World News</h3>
       ${newsHtml}
@@ -713,9 +865,14 @@ function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors
   `;
 }
 
-function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors) {
+function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors, podcast) {
   const lines = [];
   lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
+  if (podcast && podcast.fileName) {
+    lines.push(`\uD83C\uDFA7 3-Min Podcast attached: ${podcast.fileName}`);
+    lines.push(`Preview: ${truncate_(podcast.script, 200)}`);
+    lines.push("");
+  }
 
   lines.push("\uD83D\uDCF0 Top World News:");
   if (news.length) {
@@ -744,7 +901,7 @@ function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors
     });
   } else {
     lines.push("(No Chinese book items available today.)");
-   }
+  }
 
   lines.push("\nQuestion of the day: Which story sounds the most interesting, and why?");
 
