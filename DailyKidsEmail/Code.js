@@ -10,6 +10,9 @@
  * - PODCAST_OPENAI_MODEL: (optional) default "gpt-4o-mini-tts"
  * - PODCAST_OPENAI_VOICE: (optional) default "coral"
  * - PODCAST_OPENAI_INSTRUCTIONS: (optional) speaking style guidance
+ * - PODCAST_SCRIPT_MODEL: (optional) default "gpt-4.1-mini"
+ * - PODCAST_SCRIPT_STYLE: (optional) style prompt for script generation
+ * - PODCAST_LINK_SUMMARY_LIMIT: (optional) max linked URLs passed to script model, default 6
  * - KCLS_CHINESE_KIDS_LIST_URLS: (optional) JSON array of fixed KCLS Chinese kids list URLs
  * - CHINESE_KIDS_AWARD_URLS: (optional) JSON array of official award/list URLs for curated Chinese kids books
  */
@@ -81,7 +84,8 @@ function dailyJob() {
       console.log(JSON.stringify({
         event: "podcast_generation_started",
         date: new Date().toISOString(),
-        model: cfg.podcastOpenAiModel,
+        scriptModel: cfg.podcastScriptModel,
+        ttsModel: cfg.podcastOpenAiModel,
         voice: cfg.podcastOpenAiVoice
       }));
 
@@ -92,6 +96,9 @@ function dailyJob() {
         chineseBooks,
         errors,
         cfg.openAiApiKey,
+        cfg.podcastScriptModel,
+        cfg.podcastScriptStyle,
+        cfg.podcastLinkSummaryLimit,
         cfg.podcastOpenAiModel,
         cfg.podcastOpenAiVoice,
         cfg.podcastOpenAiInstructions
@@ -153,6 +160,9 @@ function getConfig_() {
   const podcastEnabled = podcastEnabledRaw
     ? podcastEnabledRaw.toLowerCase() === "true"
     : !!openAiApiKey;
+  const podcastScriptModel = props.getProperty("PODCAST_SCRIPT_MODEL") || "gpt-4.1-mini";
+  const podcastScriptStyle = props.getProperty("PODCAST_SCRIPT_STYLE") || "Fun, catchy, kid-friendly radio host style with playful transitions and curiosity hooks.";
+  const podcastLinkSummaryLimit = Math.max(0, parseInt(props.getProperty("PODCAST_LINK_SUMMARY_LIMIT") || "6", 10) || 6);
   const podcastOpenAiModel = props.getProperty("PODCAST_OPENAI_MODEL") || "gpt-4o-mini-tts";
   const podcastOpenAiVoice = props.getProperty("PODCAST_OPENAI_VOICE") || "coral";
   const podcastOpenAiInstructions = props.getProperty("PODCAST_OPENAI_INSTRUCTIONS") || "Warm, upbeat, youthful girl narrator voice, clear pacing for kids.";
@@ -184,6 +194,9 @@ function getConfig_() {
     googleBooksApiKey,
     openAiApiKey,
     podcastEnabled,
+    podcastScriptModel,
+    podcastScriptStyle,
+    podcastLinkSummaryLimit,
     podcastOpenAiModel,
     podcastOpenAiVoice,
     podcastOpenAiInstructions,
@@ -724,17 +737,229 @@ function shuffleArray_(array) {
   return shuffled;
 }
 
-function createDailyPodcast_(daughterName, news, englishBooks, chineseBooks, errors, openAiApiKey, model, voice, instructions) {
+function createDailyPodcast_(
+  daughterName,
+  news,
+  englishBooks,
+  chineseBooks,
+  errors,
+  openAiApiKey,
+  scriptModel,
+  scriptStyle,
+  linkSummaryLimit,
+  ttsModel,
+  voice,
+  instructions
+) {
   if (!openAiApiKey) {
     throw new Error("Missing Script Property: OPENAI_API_KEY");
   }
-  const script = buildDailyPodcastScript_(daughterName, news, englishBooks, chineseBooks, errors);
+  const script = buildDailyPodcastScript_(
+    daughterName,
+    news,
+    englishBooks,
+    chineseBooks,
+    errors,
+    openAiApiKey,
+    scriptModel,
+    scriptStyle,
+    linkSummaryLimit
+  );
   const fileName = `daily-kids-podcast-${formatDate_(new Date())}.mp3`;
-  const audioBlob = synthesizeSpeechWithOpenAi_(script, openAiApiKey, model, voice, instructions, fileName);
+  const audioBlob = synthesizeSpeechWithOpenAi_(script, openAiApiKey, ttsModel, voice, instructions, fileName);
   return { fileName, script, audioBlob };
 }
 
-function buildDailyPodcastScript_(daughterName, news, englishBooks, chineseBooks, errors) {
+function buildDailyPodcastScript_(
+  daughterName,
+  news,
+  englishBooks,
+  chineseBooks,
+  errors,
+  openAiApiKey,
+  scriptModel,
+  scriptStyle,
+  linkSummaryLimit
+) {
+  try {
+    const buildStartedAt = Date.now();
+    console.log(JSON.stringify({
+      event: "podcast_script_build_started",
+      date: new Date().toISOString(),
+      scriptModel: scriptModel || "gpt-4.1-mini",
+      linkSummaryLimit: typeof linkSummaryLimit === "number" ? linkSummaryLimit : 6
+    }));
+
+    const context = buildPodcastSourceContext_(news, englishBooks, chineseBooks, linkSummaryLimit);
+    const style = scriptStyle || "Fun, catchy, kid-friendly radio host style.";
+    const model = scriptModel || "gpt-4.1-mini";
+
+    const systemPrompt =
+      "You write safe, engaging podcast scripts for children around age 9. " +
+      "Keep language simple, energetic, and positive. Include all provided items.";
+
+    const userPrompt =
+      `Create a 4-6 minute podcast script for ${safeText_(daughterName) || "a child"}.\n` +
+      `Style: ${style}\n` +
+      "Requirements:\n" +
+      "- Use ALL items from each section: world news, English books, Chinese books.\n" +
+      "- Use the provided links as references to enrich each item when possible.\n" +
+      "- Keep transitions lively and entertaining.\n" +
+      "- Mention a short question-of-the-day at the end.\n" +
+      "- Avoid scary or graphic details.\n\n" +
+      `Source context:\n${context}`;
+
+    const generated = generateTextWithOpenAi_(openAiApiKey, model, systemPrompt, userPrompt);
+    const cleaned = safeText_(generated).replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+    if (cleaned.split(/\s+/).length >= 140) {
+      console.log(JSON.stringify({
+        event: "podcast_script_build_succeeded",
+        date: new Date().toISOString(),
+        durationMs: Date.now() - buildStartedAt,
+        outputChars: cleaned.length
+      }));
+      return trimWords_(cleaned, 1200);
+    }
+  } catch (e) {
+    console.log(`Podcast script model fallback triggered: ${e.message || e}`);
+  }
+
+  return buildDailyPodcastScriptFallback_(daughterName, news, englishBooks, chineseBooks, errors);
+}
+
+function buildPodcastSourceContext_(news, englishBooks, chineseBooks, linkSummaryLimit) {
+  const lines = [];
+  const contextStartedAt = Date.now();
+  const allUrls = news.map(n => n.link)
+    .concat(englishBooks.map(b => b.link))
+    .concat(chineseBooks.map(b => b.link));
+  const maxLinks = typeof linkSummaryLimit === "number" ? linkSummaryLimit : 6;
+  const urlsForModel = dedupeUrls_(allUrls).slice(0, maxLinks);
+  const allowedUrlSet = new Set(urlsForModel);
+
+  lines.push("World News:");
+  if (!news.length) {
+    lines.push("- (none)");
+  } else {
+    news.forEach((n, i) => {
+      lines.push(`${i + 1}. Title: ${n.title}`);
+      lines.push(`   Link: ${n.link}`);
+    });
+  }
+
+  lines.push("\nPopular Kids Books (English):");
+  if (!englishBooks.length) {
+    lines.push("- (none)");
+  } else {
+    englishBooks.forEach((b, i) => {
+      lines.push(`${i + 1}. Title: ${b.title}`);
+      lines.push(`   Authors: ${b.authors || "N/A"}`);
+      lines.push(`   Link: ${b.link}`);
+      if (b.blurb) lines.push(`   Existing blurb: ${b.blurb}`);
+    });
+  }
+
+  lines.push("\nPopular Kids Books (Chinese):");
+  if (!chineseBooks.length) {
+    lines.push("- (none)");
+  } else {
+    chineseBooks.forEach((b, i) => {
+      lines.push(`${i + 1}. Title: ${b.title}`);
+      lines.push(`   Authors: ${b.authors || "N/A"}`);
+      lines.push(`   Link: ${b.link}`);
+      if (b.blurb) lines.push(`   Existing blurb: ${b.blurb}`);
+    });
+  }
+
+  const urlsSkipped = dedupeUrls_(allUrls).filter(url => !allowedUrlSet.has(url));
+  lines.push("\nReference URLs (for model enrichment):");
+  if (!urlsForModel.length) {
+    lines.push("- (none)");
+  } else {
+    urlsForModel.forEach((url, i) => lines.push(`${i + 1}. ${url}`));
+    if (urlsSkipped.length) {
+      lines.push(`- Additional URLs omitted due to PODCAST_LINK_SUMMARY_LIMIT: ${urlsSkipped.length}`);
+    }
+  }
+
+  console.log(JSON.stringify({
+    event: "podcast_context_built",
+    date: new Date().toISOString(),
+    linksInEmail: allUrls.filter(Boolean).length,
+    linksPassedToModel: urlsForModel.length,
+    linksOmitted: urlsSkipped.length,
+    durationMs: Date.now() - contextStartedAt
+  }));
+
+  return trimWords_(lines.join("\n"), 2500);
+}
+
+function dedupeUrls_(urls) {
+  const seen = new Set();
+  const out = [];
+  for (const raw of (urls || [])) {
+    const url = safeText_(raw);
+    if (!/^https?:\/\//i.test(url)) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(url);
+  }
+  return out;
+}
+
+function generateTextWithOpenAi_(apiKey, model, systemPrompt, userPrompt) {
+  const startedAt = Date.now();
+  console.log(JSON.stringify({
+    event: "openai_script_model_call_started",
+    date: new Date().toISOString(),
+    model: model || "gpt-4.1-mini"
+  }));
+
+  const url = "https://api.openai.com/v1/chat/completions";
+  const payload = {
+    model: model || "gpt-4.1-mini",
+    temperature: 0.9,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ],
+    max_tokens: 1800
+  };
+
+  const resp = UrlFetchApp.fetch(url, {
+    method: "post",
+    contentType: "application/json",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+  if (resp.getResponseCode() >= 400) {
+    console.log(JSON.stringify({
+      event: "openai_script_model_call_failed",
+      date: new Date().toISOString(),
+      model: model || "gpt-4.1-mini",
+      statusCode: resp.getResponseCode(),
+      durationMs: Date.now() - startedAt
+    }));
+    throw new Error(`OpenAI chat.completions error ${resp.getResponseCode()}: ${resp.getContentText()}`);
+  }
+
+  const data = JSON.parse(resp.getContentText("UTF-8"));
+  const text = (((data.choices || [])[0] || {}).message || {}).content || "";
+  if (!safeText_(text)) throw new Error("OpenAI chat.completions returned empty script");
+
+  console.log(JSON.stringify({
+    event: "openai_script_model_call_succeeded",
+    date: new Date().toISOString(),
+    model: model || "gpt-4.1-mini",
+    durationMs: Date.now() - startedAt,
+    outputChars: text.length
+  }));
+
+  return text;
+}
+
+function buildDailyPodcastScriptFallback_(daughterName, news, englishBooks, chineseBooks, errors) {
   const name = safeText_(daughterName) || "friend";
   const intro = `Hi ${name}! Here is your three minute Daily News and Books podcast.`;
 
@@ -791,10 +1016,19 @@ function trimWords_(text, maxWords) {
 }
 
 function synthesizeSpeechWithOpenAi_(text, apiKey, model, voice, instructions, fileName) {
+  const startedAt = Date.now();
+  console.log(JSON.stringify({
+    event: "openai_tts_model_call_started",
+    date: new Date().toISOString(),
+    model: model || "gpt-4o-mini-tts",
+    voice: voice || "coral",
+    inputChars: safeText_(text).length
+  }));
+
   const url = "https://api.openai.com/v1/audio/speech";
   const payload = {
     model: model || "gpt-4o-mini-tts",
-    voice: voice || "alloy",
+    voice: voice || "coral",
     input: text,
     response_format: "mp3"
   };
@@ -810,9 +1044,24 @@ function synthesizeSpeechWithOpenAi_(text, apiKey, model, voice, instructions, f
     muteHttpExceptions: true
   });
   if (resp.getResponseCode() >= 400) {
+    console.log(JSON.stringify({
+      event: "openai_tts_model_call_failed",
+      date: new Date().toISOString(),
+      model: model || "gpt-4o-mini-tts",
+      statusCode: resp.getResponseCode(),
+      durationMs: Date.now() - startedAt
+    }));
     throw new Error(`OpenAI audio.speech error ${resp.getResponseCode()}: ${resp.getContentText()}`);
   }
-  return resp.getBlob().setName(fileName).setContentType("audio/mpeg");
+  const blob = resp.getBlob().setName(fileName).setContentType("audio/mpeg");
+  console.log(JSON.stringify({
+    event: "openai_tts_model_call_succeeded",
+    date: new Date().toISOString(),
+    model: model || "gpt-4o-mini-tts",
+    durationMs: Date.now() - startedAt,
+    sizeBytes: blob.getBytes().length
+  }));
+  return blob;
 }
 
 function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors, podcast) {
