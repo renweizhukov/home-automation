@@ -396,13 +396,13 @@ function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors
     <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.4;">
       <p>${intro}</p>
 
-      <h3>📰 Top World News</h3>
+      <h3>&#x1F4F0; Top World News</h3>
       ${newsHtml}
 
-      <h3>📚 Popular Kids' Books (English)</h3>
+      <h3>&#x1F4DA; Popular Kids' Books (English)</h3>
       ${englishBooksHtml}
 
-      <h3>📚 Popular Kids' Books (Chinese)</h3>
+      <h3>&#x1F4DA; Popular Kids' Books (Chinese)</h3>
       ${chineseBooksHtml}
 
       <hr>
@@ -416,14 +416,14 @@ function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors
   const lines = [];
   lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
 
-  lines.push("📰 Top World News:");
+  lines.push("\uD83D\uDCF0 Top World News:");
   if (news.length) {
     news.forEach((n, i) => lines.push(`${i + 1}. ${n.title}\n   ${n.link}`));
   } else {
     lines.push("(No news items available today.)");
   }
 
-  lines.push("\n📚 Popular Kids' Books (English):");
+  lines.push("\n\uD83D\uDCDA Popular Kids' Books (English):");
   if (englishBooks.length) {
     englishBooks.forEach((b, i) => {
       const authorPart = b.authors ? ` (${b.authors})` : "";
@@ -434,7 +434,7 @@ function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors
     lines.push("(No English book items available today.)");
   }
 
-  lines.push("\n📚 Popular Kids' Books (Chinese):");
+  lines.push("\n\uD83D\uDCDA Popular Kids' Books (Chinese):");
   if (chineseBooks.length) {
     chineseBooks.forEach((b, i) => {
       const authorPart = b.authors ? ` (${b.authors})` : "";
