@@ -805,12 +805,15 @@ function buildDailyPodcastScript_(
       "- Use ALL items from each section: world news, English books, Chinese books.\n" +
       "- Use the provided links as references to enrich each item when possible.\n" +
       "- Keep transitions lively and entertaining.\n" +
+      "- Do not include stage directions or audio cues (for example: Sound effect, SFX, music cue).\n" +
       "- Mention a short question-of-the-day at the end.\n" +
       "- Avoid scary or graphic details.\n\n" +
       `Source context:\n${context}`;
 
     const generated = generateTextWithOpenAi_(openAiApiKey, model, systemPrompt, userPrompt);
-    const cleaned = safeText_(generated).replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+    const cleaned = stripPodcastAudioCues_(generated)
+      .replace(/\s+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n");
     if (cleaned.split(/\s+/).length >= 140) {
       console.log(JSON.stringify({
         event: "podcast_script_build_succeeded",
@@ -905,6 +908,15 @@ function dedupeUrls_(urls) {
     out.push(url);
   }
   return out;
+}
+
+function stripPodcastAudioCues_(text) {
+  return safeText_(text)
+    .replace(/\[[^\]]*\b(sound effects?|sfx|music cue|jingle)\b[^\]]*\]/gi, " ")
+    .replace(/\([^\)]*\b(sound effects?|sfx|music cue|jingle)\b[^\)]*\)/gi, " ")
+    .replace(/\b(sound effects?|sfx)\b\s*[:\-]?\s*[^.!?\n]*(?:[.!?]|$)/gi, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function generateTextWithOpenAi_(apiKey, model, systemPrompt, userPrompt) {
@@ -1067,7 +1079,7 @@ function synthesizeSpeechWithOpenAi_(text, apiKey, model, voice, instructions, f
 function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors, podcast) {
   const intro = `Hi ${daughterName}! Here are today’s updates.`;
   const podcastHtml = podcast
-    ? `<p><b>&#x1F3A7; 3-Min Podcast:</b> Audio attached as <b>${escapeHtml_(podcast.fileName)}</b>.<br><span style="color:#555;">Preview: ${escapeHtml_(truncate_(podcast.script, 240))}</span></p>`
+    ? `<p><b>&#x1F3A7; 4 ~ 6 mins podcast:</b> Audio attached as <b>${escapeHtml_(podcast.fileName)}</b>.<br><span style="color:#555;">Preview: ${escapeHtml_(truncate_(podcast.script, 240))}</span></p>`
     : "";
 
   const newsHtml = news.length
@@ -1119,7 +1131,7 @@ function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors
   const lines = [];
   lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
   if (podcast && podcast.fileName) {
-    lines.push(`\uD83C\uDFA7 3-Min Podcast attached: ${podcast.fileName}`);
+    lines.push(`\uD83C\uDFA7 4 ~ 6 mins podcast attached: ${podcast.fileName}`);
     lines.push(`Preview: ${truncate_(podcast.script, 200)}`);
     lines.push("");
   }
