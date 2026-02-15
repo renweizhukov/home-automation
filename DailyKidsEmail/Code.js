@@ -248,10 +248,10 @@ function renderEmailHtml_(daughterName, news, books, errors) {
     <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.4;">
       <p>${intro}</p>
 
-      <h3>Top World News</h3>
+      <h3>📰 Top World News</h3>
       ${newsHtml}
 
-      <h3>Popular Kids’ Books</h3>
+      <h3>📚 Popular Kids’ Books</h3>
       ${booksHtml}
 
       <hr>
@@ -265,14 +265,14 @@ function renderEmailText_(daughterName, news, books, errors) {
   const lines = [];
   lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
 
-  lines.push("Top World News:");
+  lines.push("📰 Top World News:");
   if (news.length) {
     news.forEach((n, i) => lines.push(`${i + 1}. ${n.title}\n   ${n.link}`));
   } else {
     lines.push("(No news items available today.)");
   }
 
-  lines.push("\nPopular Kids’ Books:");
+  lines.push("\n📚 Popular Kids’ Books:");
   if (books.length) {
     books.forEach((b, i) => {
       const authorPart = b.authors ? ` (${b.authors})` : "";
