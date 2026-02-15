@@ -208,7 +208,11 @@ function getPopularKidsBooks_(limit, apiKey) {
     'subject:"children\'s fiction"',
     'subject:"juvenile fiction" subject:"adventure"',
     'subject:"juvenile fiction" subject:"fantasy"',
-    'subject:"children\'s books"'
+    'subject:"children\'s books"',
+    'subject:"juvenile nonfiction" subject:"science"',
+    'subject:"juvenile nonfiction" subject:"history"',
+    'subject:"comics & graphic novels" subject:"juvenile"',
+    'subject:"manga" subject:"juvenile"'
   ];
 
   const recentQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
