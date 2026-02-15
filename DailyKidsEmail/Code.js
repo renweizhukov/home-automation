@@ -268,7 +268,8 @@ function getPopularKidsBooks_(limit, apiKey) {
     'subject:"children\'s books"',
     'subject:"juvenile nonfiction" subject:"science"',
     'subject:"juvenile nonfiction" subject:"history"',
-    'subject:"comics & graphic novels" subject:"juvenile"',
+    'subject:"graphic novels" subject:"juvenile fiction"',
+    'subject:"comics" subject:"juvenile fiction"',
     'subject:"manga" subject:"juvenile"'
   ];
 
