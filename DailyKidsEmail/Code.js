@@ -195,15 +195,14 @@ function getNewsItems_(rssUrls, limit) {
 }
 
 function getPopularKidsBooks_(limit, apiKey) {
-  // Randomize results by:
-  // 1. Fetching more books than needed (3-4x the limit)
-  // 2. Optionally varying query terms for diversity
-  // 3. Randomly shuffling and selecting the requested number
-  
+  // Run two queries and combine:
+  // 1) Recent books (published in the past 5 years)
+  // 2) All-time books
   const fetchMultiplier = 4; // Fetch 4x the limit to have more options
   const maxResults = Math.min(Math.max(limit * fetchMultiplier, 20), 40);
-  
-  // Vary query terms for more diversity (randomly select one)
+  const currentYear = new Date().getFullYear();
+  const recentCutoffYear = currentYear - 4; // inclusive year range: currentYear-4 .. currentYear
+
   const queryVariants = [
     'subject:"juvenile fiction"',
     'subject:"children\'s fiction"',
@@ -211,67 +210,78 @@ function getPopularKidsBooks_(limit, apiKey) {
     'subject:"juvenile fiction" subject:"fantasy"',
     'subject:"children\'s books"'
   ];
-  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
-  const q = encodeURIComponent(randomQuery);
-  
-  // Optionally use random startIndex to get different pages (0-10)
-  const randomStart = Math.floor(Math.random() * 11);
-  
-  let url =
-    `https://www.googleapis.com/books/v1/volumes` +
-    `?q=${q}` +
-    `&maxResults=${maxResults}` +
-    `&startIndex=${randomStart}` +
-    `&printType=books` +
-    `&langRestrict=en` +
-    `&country=US`;
 
-  if (apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
+  const recentQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+  const recentStart = Math.floor(Math.random() * 6);
+  const recentBooksRaw = getGoogleBooks_(
+    recentQuery,
+    "en",
+    "US",
+    maxResults,
+    recentStart,
+    apiKey,
+    { orderBy: "newest" }
+  );
+  const recentBooks = recentBooksRaw.filter(b => (b.publishedYear || 0) >= recentCutoffYear);
 
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-  if (resp.getResponseCode() >= 400) {
-    throw new Error(`Google Books error ${resp.getResponseCode()}: ${resp.getContentText()}`);
+  const allTimeQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+  const allTimeStart = Math.floor(Math.random() * 11);
+  const allTimeBooks = getGoogleBooks_(
+    allTimeQuery,
+    "en",
+    "US",
+    maxResults,
+    allTimeStart,
+    apiKey
+  );
+
+  const recentPool = shuffleArray_(dedupeBooksByTitle_(recentBooks));
+  const allTimePool = shuffleArray_(dedupeBooksByTitle_(allTimeBooks));
+  const selected = [];
+  const selectedTitleKeys = new Set();
+
+  const preferredRecentCount = limit >= 5 ? 3 : Math.ceil(limit * 0.6);
+  const targetRecent = Math.min(preferredRecentCount, limit);
+  const targetAllTime = Math.max(0, limit - targetRecent);
+
+  function pickFromPool_(pool, need) {
+    let added = 0;
+    for (const b of pool) {
+      if (added >= need) break;
+      const key = getBookTitleKey_(b);
+      if (selectedTitleKeys.has(key)) continue;
+      selected.push(b);
+      selectedTitleKeys.add(key);
+      added += 1;
+    }
+    return added;
   }
 
-  const data = JSON.parse(resp.getContentText("UTF-8"));
-  const apiItemsCount = data.items ? data.items.length : 0;
-  const apiTotalItems = data.totalItems || 0;
-  
-  console.log(JSON.stringify({
-    event: "books_api_response",
-    apiItemsCount,
-    apiTotalItems,
-    query: randomQuery,
-    startIndex: randomStart,
-    maxResults
-  }));
-  
-  const allBooks = [];
+  const pickedRecent = pickFromPool_(recentPool, targetRecent);
+  const pickedAllTime = pickFromPool_(allTimePool, targetAllTime);
 
-  for (const item of (data.items || [])) {
-    const v = item.volumeInfo || {};
-    const title = v.title || "";
-    const authors = (v.authors || []).join(", ");
-    const description = (v.description || "").replace(/<[^>]*>/g, ""); // strip HTML
-    const link = v.previewLink || v.infoLink || "";
-
-    if (!title || !link) continue;
-
-    allBooks.push({
-      title,
-      authors,
-      link,
-      blurb: truncate_(description, 220)
-    });
-  }
+  if (selected.length < limit) pickFromPool_(recentPool, limit - selected.length);
+  if (selected.length < limit) pickFromPool_(allTimePool, limit - selected.length);
 
   console.log(JSON.stringify({
-    event: "books_before_shuffle",
-    count: allBooks.length
+    event: "books_dual_query",
+    recentQuery,
+    recentStart,
+    recentCutoffYear,
+    recentCount: recentBooks.length,
+    recentPoolCount: recentPool.length,
+    allTimeQuery,
+    allTimeStart,
+    allTimeCount: allTimeBooks.length,
+    allTimePoolCount: allTimePool.length,
+    pickedRecent,
+    pickedAllTime,
+    finalCount: selected.length,
+    finalUniqueTitleCount: selectedTitleKeys.size
   }));
 
-  // Randomly shuffle and select the requested number
-  const shuffled = shuffleArray_(allBooks);
+  // Randomize final order while preserving weighted composition
+  const shuffled = shuffleArray_(selected);
   
   console.log(JSON.stringify({
     event: "books_after_shuffle",
@@ -454,7 +464,8 @@ function extractChineseBracketTitles_(html) {
   return dedupeStrings_(titles);
 }
 
-function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, apiKey) {
+function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, apiKey, options) {
+  const opts = options || {};
   const q = encodeURIComponent(query);
   let url =
     `https://www.googleapis.com/books/v1/volumes` +
@@ -465,6 +476,7 @@ function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, a
     `&langRestrict=${encodeURIComponent(langRestrict)}` +
     `&country=${encodeURIComponent(country)}`;
 
+  if (opts.orderBy) url += `&orderBy=${encodeURIComponent(opts.orderBy)}`;
   if (apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
 
   const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
@@ -480,13 +492,15 @@ function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, a
     const authors = (v.authors || []).join(", ");
     const description = (v.description || "").replace(/<[^>]*>/g, "");
     const link = v.previewLink || v.infoLink || "";
+    const publishedYear = parsePublishedYear_(v.publishedDate || "");
 
     if (!title || !link) continue;
     books.push({
       title,
       authors,
       link,
-      blurb: truncate_(description, 220)
+      blurb: truncate_(description, 220),
+      publishedYear
     });
   }
 
@@ -532,6 +546,15 @@ function getOpenLibraryChineseKidsBooks_(maxResults) {
   return dedupeBooks_(books);
 }
 
+function parsePublishedYear_(publishedDateText) {
+  const text = safeText_(publishedDateText);
+  const m = /^(\d{4})/.exec(text);
+  if (!m) return null;
+  const y = parseInt(m[1], 10);
+  if (y < 1000 || y > 3000) return null;
+  return y;
+}
+
 function isLikelyChineseBook_(book) {
   const haystack = `${book.title || ""} ${book.authors || ""} ${book.blurb || ""}`;
   return /[\u3400-\u9FFF]/.test(haystack);
@@ -571,12 +594,34 @@ function dedupeBooks_(books) {
   const seen = new Set();
   const out = [];
   for (const b of books) {
-    const key = `${(b.title || "").toLowerCase()}|${(b.authors || "").toLowerCase()}`;
+    const key = getBookKey_(b);
     if (seen.has(key)) continue;
     seen.add(key);
     out.push(b);
   }
   return out;
+}
+
+function dedupeBooksByTitle_(books) {
+  const seen = new Set();
+  const out = [];
+  for (const b of books) {
+    const key = getBookTitleKey_(b);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(b);
+  }
+  return out;
+}
+
+function getBookKey_(b) {
+  return `${(b.title || "").toLowerCase()}|${(b.authors || "").toLowerCase()}`;
+}
+
+function getBookTitleKey_(b) {
+  return (b.title || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u3400-\u9FFF]+/g, "");
 }
 
 function dedupeStrings_(arr) {
