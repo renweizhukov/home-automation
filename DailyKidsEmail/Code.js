@@ -1,5 +1,5 @@
 /**
- * Daily email: world news (RSS) + popular kids books (Google Books)
+ * Daily email: world news (RSS) + popular kids books in English/Chinese
  *
  * Setup Script Properties:
  * - DAUGHTER_EMAIL: recipient email
@@ -11,7 +11,8 @@ function dailyJob() {
   const cfg = getConfig_();
 
   let news = [];
-  let books = [];
+  let englishBooks = [];
+  let chineseBooks = [];
   const errors = [];
 
   try {
@@ -21,14 +22,20 @@ function dailyJob() {
   }
 
   try {
-    books = getPopularKidsBooks_(5, cfg.googleBooksApiKey);
+    englishBooks = getPopularKidsBooks_(5, cfg.googleBooksApiKey);
   } catch (e) {
-    errors.push(`Books fetch failed: ${e.message || e}`);
+    errors.push(`English books fetch failed: ${e.message || e}`);
+  }
+
+  try {
+    chineseBooks = getPopularChineseKidsBooks_(5, cfg.googleBooksApiKey);
+  } catch (e) {
+    errors.push(`Chinese books fetch failed: ${e.message || e}`);
   }
 
   const subject = `Daily News + Books for JoJo (${formatDate_ (new Date())})`;
-  const html = renderEmailHtml_(cfg.daughterName, news, books, errors);
-  const text = renderEmailText_(cfg.daughterName, news, books, errors);
+  const html = renderEmailHtml_(cfg.daughterName, news, englishBooks, chineseBooks, errors);
+  const text = renderEmailText_(cfg.daughterName, news, englishBooks, chineseBooks, errors);
 
   GmailApp.sendEmail(cfg.recipients, subject, text, { htmlBody: html });
 
@@ -36,7 +43,8 @@ function dailyJob() {
     event: "dailyJob_sent",
     date: new Date().toISOString(),
     newsCount: news.length,
-    bookCount: books.length,
+    englishBookCount: englishBooks.length,
+    chineseBookCount: chineseBooks.length,
     errors
   }));
 }
@@ -215,6 +223,138 @@ function getPopularKidsBooks_(limit, apiKey) {
   return shuffled.slice(0, limit);
 }
 
+function getPopularChineseKidsBooks_(limit, apiKey) {
+  // Prefer Google Books for consistency with the existing pipeline.
+  // If results look weak, supplement with Open Library as fallback.
+  const fetchMultiplier = 4;
+  const maxResults = Math.min(Math.max(limit * fetchMultiplier, 20), 40);
+
+  const queryVariants = [
+    'subject:"Children\'s stories, Chinese"',
+    'subject:"juvenile fiction" 儿童文学',
+    '儿童文学',
+    '少儿故事',
+    '儿童小说'
+  ];
+  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+  const randomStart = Math.floor(Math.random() * 11);
+
+  const googleBooks = getGoogleBooks_(randomQuery, "zh", "US", maxResults, randomStart, apiKey)
+    .filter(b => isLikelyChineseBook_(b))
+    .filter(b => !denyHit_(`${b.title} ${b.blurb || ""}`, ["言情", "成人", "耽美", "色情", "恐怖"]));
+
+  console.log(JSON.stringify({
+    event: "chinese_books_google",
+    query: randomQuery,
+    startIndex: randomStart,
+    maxResults,
+    googleCount: googleBooks.length
+  }));
+
+  let merged = googleBooks;
+  if (merged.length < limit) {
+    const fallback = getOpenLibraryChineseKidsBooks_(maxResults);
+    console.log(JSON.stringify({
+      event: "chinese_books_openlibrary_fallback",
+      fallbackCount: fallback.length
+    }));
+    merged = dedupeBooks_(merged.concat(fallback));
+  }
+
+  return shuffleArray_(merged).slice(0, limit);
+}
+
+function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, apiKey) {
+  const q = encodeURIComponent(query);
+  let url =
+    `https://www.googleapis.com/books/v1/volumes` +
+    `?q=${q}` +
+    `&maxResults=${maxResults}` +
+    `&startIndex=${startIndex}` +
+    `&printType=books` +
+    `&langRestrict=${encodeURIComponent(langRestrict)}` +
+    `&country=${encodeURIComponent(country)}`;
+
+  if (apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
+
+  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  if (resp.getResponseCode() >= 400) {
+    throw new Error(`Google Books error ${resp.getResponseCode()}: ${resp.getContentText()}`);
+  }
+
+  const data = JSON.parse(resp.getContentText("UTF-8"));
+  const books = [];
+  for (const item of (data.items || [])) {
+    const v = item.volumeInfo || {};
+    const title = v.title || "";
+    const authors = (v.authors || []).join(", ");
+    const description = (v.description || "").replace(/<[^>]*>/g, "");
+    const link = v.previewLink || v.infoLink || "";
+
+    if (!title || !link) continue;
+    books.push({
+      title,
+      authors,
+      link,
+      blurb: truncate_(description, 220)
+    });
+  }
+
+  return books;
+}
+
+function getOpenLibraryChineseKidsBooks_(maxResults) {
+  const queryVariants = ["儿童文学", "少儿故事", "童话", "少年小说"];
+  const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
+  const url =
+    `https://openlibrary.org/search.json` +
+    `?q=${encodeURIComponent(randomQuery)}` +
+    `&language=chi` +
+    `&limit=${Math.min(Math.max(maxResults, 20), 50)}`;
+
+  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  if (resp.getResponseCode() >= 400) {
+    throw new Error(`Open Library error ${resp.getResponseCode()}: ${resp.getContentText()}`);
+  }
+
+  const data = JSON.parse(resp.getContentText("UTF-8"));
+  const books = [];
+  for (const d of (data.docs || [])) {
+    const title = safeText_(d.title);
+    if (!title) continue;
+
+    const authors = (d.author_name || []).slice(0, 2).join(", ");
+    const link = d.key ? `https://openlibrary.org${d.key}` : "";
+    if (!link) continue;
+
+    books.push({
+      title,
+      authors,
+      link,
+      blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
+    });
+  }
+
+  return books.filter(b => isLikelyChineseBook_(b));
+}
+
+function isLikelyChineseBook_(book) {
+  const haystack = `${book.title || ""} ${book.authors || ""} ${book.blurb || ""}`;
+  return /[\u3400-\u9FFF]/.test(haystack);
+}
+
+function dedupeBooks_(books) {
+  const seen = new Set();
+  const out = [];
+  for (const b of books) {
+    const key = `${(b.title || "").toLowerCase()}|${(b.authors || "").toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(b);
+  }
+  return out;
+}
+
 function shuffleArray_(array) {
   // Fisher-Yates shuffle algorithm
   const shuffled = array.slice(); // Create a copy
@@ -225,20 +365,28 @@ function shuffleArray_(array) {
   return shuffled;
 }
 
-function renderEmailHtml_(daughterName, news, books, errors) {
+function renderEmailHtml_(daughterName, news, englishBooks, chineseBooks, errors) {
   const intro = `Hi ${daughterName}! Here are today’s updates.`;
 
   const newsHtml = news.length
     ? `<ol>${news.map(n => `<li><a href="${escapeHtml_(n.link)}">${escapeHtml_(n.title)}</a></li>`).join("")}</ol>`
     : `<p><i>No news items available today.</i></p>`;
 
-  const booksHtml = books.length
-    ? `<ol>${books.map(b => {
+  const englishBooksHtml = englishBooks.length
+    ? `<ol>${englishBooks.map(b => {
         const authorPart = b.authors ? ` <span style="color:#555;">(${escapeHtml_(b.authors)})</span>` : "";
         const blurbPart = b.blurb ? `<div style="color:#333; margin-top:4px;">${escapeHtml_(b.blurb)}</div>` : "";
         return `<li><a href="${escapeHtml_(b.link)}">${escapeHtml_(b.title)}</a>${authorPart}${blurbPart}</li>`;
       }).join("")}</ol>`
-    : `<p><i>No book items available today.</i></p>`;
+    : `<p><i>No English book items available today.</i></p>`;
+
+  const chineseBooksHtml = chineseBooks.length
+    ? `<ol>${chineseBooks.map(b => {
+        const authorPart = b.authors ? ` <span style="color:#555;">(${escapeHtml_(b.authors)})</span>` : "";
+        const blurbPart = b.blurb ? `<div style="color:#333; margin-top:4px;">${escapeHtml_(b.blurb)}</div>` : "";
+        return `<li><a href="${escapeHtml_(b.link)}">${escapeHtml_(b.title)}</a>${authorPart}${blurbPart}</li>`;
+      }).join("")}</ol>`
+    : `<p><i>No Chinese book items available today.</i></p>`;
 
   const errHtml = errors.length
     ? `<hr><p style="color:#a00;"><b>Note:</b> Some sources failed today:<br>${errors.map(e => escapeHtml_(e)).join("<br>")}</p>`
@@ -251,8 +399,11 @@ function renderEmailHtml_(daughterName, news, books, errors) {
       <h3>📰 Top World News</h3>
       ${newsHtml}
 
-      <h3>📚 Popular Kids’ Books</h3>
-      ${booksHtml}
+      <h3>📚 Popular Kids' Books (English)</h3>
+      ${englishBooksHtml}
+
+      <h3>📚 Popular Kids' Books (Chinese)</h3>
+      ${chineseBooksHtml}
 
       <hr>
       <p style="color:#555;">Question of the day: Which story sounds the most interesting, and why?</p>
@@ -261,7 +412,7 @@ function renderEmailHtml_(daughterName, news, books, errors) {
   `;
 }
 
-function renderEmailText_(daughterName, news, books, errors) {
+function renderEmailText_(daughterName, news, englishBooks, chineseBooks, errors) {
   const lines = [];
   lines.push(`Hi ${daughterName}! Here are today's updates.\n`);
 
@@ -272,15 +423,26 @@ function renderEmailText_(daughterName, news, books, errors) {
     lines.push("(No news items available today.)");
   }
 
-  lines.push("\n📚 Popular Kids’ Books:");
-  if (books.length) {
-    books.forEach((b, i) => {
+  lines.push("\n📚 Popular Kids' Books (English):");
+  if (englishBooks.length) {
+    englishBooks.forEach((b, i) => {
       const authorPart = b.authors ? ` (${b.authors})` : "";
       const blurbPart = b.blurb ? `\n   ${b.blurb}` : "";
       lines.push(`${i + 1}. ${b.title}${authorPart}\n   ${b.link}${blurbPart}`);
     });
   } else {
-    lines.push("(No book items available today.)");
+    lines.push("(No English book items available today.)");
+  }
+
+  lines.push("\n📚 Popular Kids' Books (Chinese):");
+  if (chineseBooks.length) {
+    chineseBooks.forEach((b, i) => {
+      const authorPart = b.authors ? ` (${b.authors})` : "";
+      const blurbPart = b.blurb ? `\n   ${b.blurb}` : "";
+      lines.push(`${i + 1}. ${b.title}${authorPart}\n   ${b.link}${blurbPart}`);
+    });
+  } else {
+    lines.push("(No Chinese book items available today.)");
   }
 
   lines.push("\nQuestion of the day: Which story sounds the most interesting, and why?");
