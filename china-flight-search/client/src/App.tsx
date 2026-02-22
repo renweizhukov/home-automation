@@ -7,7 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import NotFound from "@/pages/NotFound";
 import Home from "@/pages/Home";
 import Routes from "@/pages/Routes";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router as WouterRouter } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -26,15 +26,19 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
+  // Support base path for GitHub Pages deployment (e.g., /home-automation/)
+  const base = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/routes" component={Routes} />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <WouterRouter base={base}>
+      <Layout>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/routes" component={Routes} />
+          <Route path="/404" component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Layout>
+    </WouterRouter>
   );
 }
 
