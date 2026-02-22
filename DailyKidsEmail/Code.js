@@ -8,7 +8,7 @@
  * - OPENAI_API_KEY: (optional) OpenAI API key for podcast audio generation
  * - PODCAST_ENABLED: (optional) true/false. Default true when OPENAI_API_KEY is set
  * - PODCAST_OPENAI_MODEL: (optional) default "gpt-4o-mini-tts"
- * - PODCAST_OPENAI_VOICE: (optional) default "coral"
+ * - PODCAST_OPENAI_VOICE: (optional) default "marin"
  * - PODCAST_OPENAI_INSTRUCTIONS: (optional) speaking style guidance
  * - PODCAST_SCRIPT_MODEL: (optional) default "gpt-4.1-mini"
  * - PODCAST_SCRIPT_STYLE: (optional) style prompt for script generation
@@ -164,8 +164,8 @@ function getConfig_() {
   const podcastScriptStyle = props.getProperty("PODCAST_SCRIPT_STYLE") || "Fun, catchy, kid-friendly radio host style with playful transitions and curiosity hooks.";
   const podcastLinkSummaryLimit = Math.max(0, parseInt(props.getProperty("PODCAST_LINK_SUMMARY_LIMIT") || "6", 10) || 6);
   const podcastOpenAiModel = props.getProperty("PODCAST_OPENAI_MODEL") || "gpt-4o-mini-tts";
-  const podcastOpenAiVoice = props.getProperty("PODCAST_OPENAI_VOICE") || "coral";
-  const podcastOpenAiInstructions = props.getProperty("PODCAST_OPENAI_INSTRUCTIONS") || "Warm, upbeat, youthful girl narrator voice, clear pacing for kids.";
+  const podcastOpenAiVoice = props.getProperty("PODCAST_OPENAI_VOICE") || "marin";
+  const podcastOpenAiInstructions = props.getProperty("PODCAST_OPENAI_INSTRUCTIONS") || "Natural, warm, gentle young girl narrator voice, conversational pacing for kids.";
   const kclsListUrlsRaw = props.getProperty("KCLS_CHINESE_KIDS_LIST_URLS");
   const awardUrlsRaw = props.getProperty("CHINESE_KIDS_AWARD_URLS");
   let kclsChineseKidsListUrls = DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS;
@@ -1065,14 +1065,14 @@ function synthesizeSpeechWithOpenAi_(text, apiKey, model, voice, instructions, f
     event: "openai_tts_model_call_started",
     date: new Date().toISOString(),
     model: model || "gpt-4o-mini-tts",
-    voice: voice || "coral",
+    voice: voice || "marin",
     inputChars: safeText_(text).length
   }));
 
   const url = "https://api.openai.com/v1/audio/speech";
   const payload = {
     model: model || "gpt-4o-mini-tts",
-    voice: voice || "coral",
+    voice: voice || "marin",
     input: text,
     response_format: "mp3"
   };

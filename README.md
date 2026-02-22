@@ -51,7 +51,7 @@ The script uses Google Apps Script Properties for configuration:
 - `PODCAST_SCRIPT_STYLE`: Style guidance for script model (optional)
 - `PODCAST_LINK_SUMMARY_LIMIT`: Max number of links passed to script model context (optional, default `6`)
 - `PODCAST_OPENAI_MODEL`: TTS model (optional, default `gpt-4o-mini-tts`)
-- `PODCAST_OPENAI_VOICE`: TTS voice (optional, default `coral`)
+- `PODCAST_OPENAI_VOICE`: TTS voice (optional, default `marin`)
 - `PODCAST_OPENAI_INSTRUCTIONS`: TTS speaking style instructions (optional)
 - `KCLS_CHINESE_KIDS_LIST_URLS`: JSON array of fixed KCLS list URLs (optional)
 - `CHINESE_KIDS_AWARD_URLS`: JSON array of official Chinese award/list URLs (optional)
