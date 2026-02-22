@@ -6,14 +6,13 @@ on:
       - main
     paths:
       - 'china-flight-search/**'
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -56,9 +55,7 @@ jobs:
       - name: Build website
         working-directory: china-flight-search
         env:
-          # Set base path for GitHub Pages: /home-automation/china-flight-search/
           VITE_BASE_PATH: /home-automation/china-flight-search/
-          # Disable Manus-specific runtime features for production build
           NODE_ENV: production
           VITE_ANALYTICS_ENDPOINT: ""
           VITE_ANALYTICS_WEBSITE_ID: ""
