@@ -135,9 +135,9 @@ export const staticTips = [
 
 // 最新查询：2026年2月22日 测试查询
 const latestQuery: QueryResult = {
-  id: "2026-02-22 05:34",
+  id: "2026-02-22 02:34",
   queryDate: "2026-02-22",
-  queryDateLabel: "2026年2月22日 05:34",
+  queryDateLabel: "2026年2月22日 02:34 PST",
   isLatest: true,
   searchParams: {
     origin: "西雅图（SEA）",
