@@ -75,9 +75,9 @@ description: "查询从西雅图（SEA）直飞中国主要城市（上海PVG、
 
 ```typescript
 const newQuery: QueryResult = {
-  id: "YYYY-MM-DD",              // 查询日期，格式 YYYY-MM-DD
+  id: "YYYY-MM-DD HH:MM",        // 查询时间戳，格式 YYYY-MM-DD HH:MM（PST），同一天多次查询不会冲突
   queryDate: "YYYY-MM-DD",
-  queryDateLabel: "YYYY年M月D日",
+  queryDateLabel: "YYYY年M月D日 HH:MM",  // 显示时间，如「2026年3月1日 08:00」
   isLatest: true,
   searchParams: {
     origin: "西雅图（SEA）",
@@ -114,7 +114,7 @@ cp /home/ubuntu/sea-china-flights/client/src/data/flightData.ts \
 # 2. 提交并推送（会自动触发 GitHub Actions 重新部署）
 cd /home/ubuntu/home-automation
 git add china-flight-search/client/src/data/flightData.ts
-git commit -m "data: update flight search results YYYY-MM-DD"
+git commit -m "data: update flight search results YYYY-MM-DD HH:MM PST"
 git pull origin main --rebase   # 先拉取避免冲突
 git push origin main
 ```

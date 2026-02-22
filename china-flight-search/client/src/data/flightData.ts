@@ -4,9 +4,9 @@
 // ============================================================
 
 export interface QueryResult {
-  id: string;
-  queryDate: string;        // 查询日期
-  queryDateLabel: string;   // 显示标签
+  id: string;               // 查询时间戳，格式 YYYY-MM-DD HH:MM，同一天多次查询不会冲突
+  queryDate: string;        // 查询日期 YYYY-MM-DD
+  queryDateLabel: string;   // 显示标签，如「2026年2月22日 08:00」
   isLatest: boolean;
   searchParams: {
     origin: string;
@@ -133,11 +133,11 @@ export const staticTips = [
 // 查询结果数据（与查询时间相关）
 // ============================================================
 
-// 最新查询：2026年2月22日
+// 最新查询：2026年2月22日 测试查询
 const latestQuery: QueryResult = {
-  id: "2026-02-22",
+  id: "2026-02-22 05:34",
   queryDate: "2026-02-22",
-  queryDateLabel: "2026年2月22日",
+  queryDateLabel: "2026年2月22日 05:34",
   isLatest: true,
   searchParams: {
     origin: "西雅图（SEA）",
