@@ -283,32 +283,62 @@ function getPopularKidsBooks_(limit, apiKey) {
     'subject:"juvenile nonfiction" subject:"history"',
     'subject:"graphic novels" subject:"juvenile fiction"',
     'subject:"comics" subject:"juvenile fiction"',
-    'subject:"manga" subject:"juvenile"'
+    'subject:"juvenile fiction" subject:"manga"'
   ];
+  const fallbackQuery = 'subject:"juvenile fiction"';
+  const nonFallbackQueries = queryVariants.filter(q => q !== fallbackQuery);
+  const recentCandidates = shuffleArray_(nonFallbackQueries).slice(0, 2).concat([fallbackQuery]);
+  const allTimeCandidates = shuffleArray_(nonFallbackQueries).slice(0, 2).concat([fallbackQuery]);
 
-  const recentQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
-  const recentStart = Math.floor(Math.random() * 6);
-  const recentBooksRaw = getGoogleBooks_(
-    recentQuery,
-    "en",
-    "US",
-    maxResults,
-    recentStart,
-    apiKey,
-    { orderBy: "newest" }
-  );
-  const recentBooks = recentBooksRaw.filter(b => (b.publishedYear || 0) >= recentCutoffYear);
+  let recentQuery = "";
+  let recentStart = 0;
+  let recentBooks = [];
+  const recentAttempts = [];
+  for (let i = 0; i < recentCandidates.length; i++) {
+    const query = recentCandidates[i];
+    const start = (i === 0) ? Math.floor(Math.random() * 4) : 0;
+    const recentBooksRaw = getGoogleBooks_(
+      query,
+      "en",
+      "US",
+      maxResults,
+      start,
+      apiKey,
+      { orderBy: "newest" }
+    );
+    const filtered = recentBooksRaw.filter(b => (b.publishedYear || 0) >= recentCutoffYear);
+    recentAttempts.push({ query, start, rawCount: recentBooksRaw.length, count: filtered.length });
+    if (filtered.length > 0) {
+      recentQuery = query;
+      recentStart = start;
+      recentBooks = filtered;
+      break;
+    }
+  }
 
-  const allTimeQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
-  const allTimeStart = Math.floor(Math.random() * 11);
-  const allTimeBooks = getGoogleBooks_(
-    allTimeQuery,
-    "en",
-    "US",
-    maxResults,
-    allTimeStart,
-    apiKey
-  );
+  let allTimeQuery = "";
+  let allTimeStart = 0;
+  let allTimeBooks = [];
+  const allTimeAttempts = [];
+  for (let i = 0; i < allTimeCandidates.length; i++) {
+    const query = allTimeCandidates[i];
+    const start = (i === 0) ? Math.floor(Math.random() * 6) : 0;
+    const fetched = getGoogleBooks_(
+      query,
+      "en",
+      "US",
+      maxResults,
+      start,
+      apiKey
+    );
+    allTimeAttempts.push({ query, start, count: fetched.length });
+    if (fetched.length > 0) {
+      allTimeQuery = query;
+      allTimeStart = start;
+      allTimeBooks = fetched;
+      break;
+    }
+  }
 
   const recentPool = shuffleArray_(dedupeBooksByTitle_(recentBooks));
   const allTimePool = shuffleArray_(dedupeBooksByTitle_(allTimeBooks));
@@ -343,10 +373,12 @@ function getPopularKidsBooks_(limit, apiKey) {
     recentQuery,
     recentStart,
     recentCutoffYear,
+    recentAttempts,
     recentCount: recentBooks.length,
     recentPoolCount: recentPool.length,
     allTimeQuery,
     allTimeStart,
+    allTimeAttempts,
     allTimeCount: allTimeBooks.length,
     allTimePoolCount: allTimePool.length,
     pickedRecent,
