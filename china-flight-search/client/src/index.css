@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --font-display: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+}
+
+:root {
+  --radius: 0.75rem;
+  /* Deep navy night sky theme */
+  --background: oklch(0.13 0.04 240);
+  --foreground: oklch(0.95 0.005 220);
+  --card: oklch(0.17 0.04 240);
+  --card-foreground: oklch(0.95 0.005 220);
+  --popover: oklch(0.17 0.04 240);
+  --popover-foreground: oklch(0.95 0.005 220);
+  --primary: oklch(0.65 0.18 220);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.05 240);
+  --secondary-foreground: oklch(0.85 0.01 220);
+  --muted: oklch(0.20 0.04 240);
+  --muted-foreground: oklch(0.65 0.02 220);
+  --accent: oklch(0.82 0.18 85);
+  --accent-foreground: oklch(0.13 0.04 240);
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.65 0.18 220);
+  --chart-1: oklch(0.65 0.18 145);
+  --chart-2: oklch(0.82 0.18 85);
+  --chart-3: oklch(0.75 0.18 55);
+  --chart-4: oklch(0.65 0.22 25);
+  --chart-5: oklch(0.55 0.22 25);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Noto Sans SC', 'Space Grotesk', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  a[href],
+  select:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
+  }
+
+  /* Price cell heat map colors */
+  .price-lowest {
+    background: oklch(0.35 0.14 145 / 0.5);
+    color: oklch(0.85 0.18 145);
+    border-color: oklch(0.55 0.18 145 / 0.6);
+  }
+  .price-low {
+    background: oklch(0.32 0.10 160 / 0.4);
+    color: oklch(0.80 0.14 160);
+    border-color: oklch(0.50 0.14 160 / 0.5);
+  }
+  .price-mid {
+    background: oklch(0.30 0.08 85 / 0.35);
+    color: oklch(0.85 0.12 85);
+    border-color: oklch(0.55 0.12 85 / 0.4);
+  }
+  .price-high {
+    background: oklch(0.28 0.08 45 / 0.35);
+    color: oklch(0.80 0.14 45);
+    border-color: oklch(0.55 0.14 45 / 0.4);
+  }
+  .price-highest {
+    background: oklch(0.28 0.10 25 / 0.4);
+    color: oklch(0.80 0.16 25);
+    border-color: oklch(0.55 0.16 25 / 0.5);
+  }
+  .price-na {
+    background: oklch(0.18 0.02 240 / 0.5);
+    color: oklch(0.40 0.02 240);
+  }
+
+  /* Gold pulse animation for best price */
+  @keyframes gold-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.82 0.18 85 / 0.4); }
+    50% { box-shadow: 0 0 0 6px oklch(0.82 0.18 85 / 0); }
+  }
+  .price-best {
+    animation: gold-pulse 2s ease-in-out infinite;
+    background: oklch(0.40 0.16 85 / 0.5) !important;
+    color: oklch(0.95 0.18 85) !important;
+    border-color: oklch(0.82 0.18 85 / 0.8) !important;
+    font-weight: 700;
+  }
+
+  /* Glass card effect */
+  .glass-card {
+    background: oklch(1 0 0 / 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid oklch(1 0 0 / 0.1);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: oklch(0.15 0.03 240);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.35 0.08 220);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.50 0.12 220);
+  }
+}
