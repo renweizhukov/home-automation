@@ -4,9 +4,9 @@
 // ============================================================
 
 export interface QueryResult {
-  id: string;               // 查询时间戳，格式 YYYY-MM-DD HH:MM，同一天多次查询不会冲突
+  id: string;               // 查询时间戳，格式 YYYY-MM-DD_HH:MM（PST），同一天多次查询不会冲突
   queryDate: string;        // 查询日期 YYYY-MM-DD
-  queryDateLabel: string;   // 显示标签，如「2026年2月22日 08:00」
+  queryDateLabel: string;   // 显示标签，如「2026年2月22日 08:00 PST」
   isLatest: boolean;
   searchParams: {
     origin: string;
@@ -133,12 +133,189 @@ export const staticTips = [
 // 查询结果数据（与查询时间相关）
 // ============================================================
 
-// 最新查询：2026年2月22日 测试查询
-const latestQuery: QueryResult = {
+// 最新查询：2026年2月22日 13:01 PST
+const query_2026_02_22_1301: QueryResult = {
+  id: "2026-02-22_13:01",
+  queryDate: "2026-02-22",
+  queryDateLabel: "2026年2月22日 13:01 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月6日（≥45天间隔）",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: [
+      "Jun 20", "Jun 25", "Jul 3", "Jul 6",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 27", "Sep 1",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 出发日期 → 返回日期间隔：
+    // Jun 20→Aug 20 = 61天 ✓, Jun 20→Aug 27 = 68天 ✓, Jun 20→Sep 1 = 73天 ✓
+    // Jun 25→Aug 20 = 56天 ✓, Jun 25→Aug 27 = 63天 ✓, Jun 25→Sep 1 = 68天 ✓
+    // Jul 3→Aug 20 = 48天 ✓, Jul 3→Aug 27 = 55天 ✓, Jul 3→Sep 1 = 60天 ✓
+    // Jul 6→Aug 20 = 45天 ✓, Jul 6→Aug 27 = 52天 ✓, Jul 6→Sep 1 = 57天 ✓
+    prices: [
+      // Jun 20: Aug20=$2150, Aug27=$2039, Sep1=未查
+      [2150, 2039, null],
+      // Jun 25: Aug20=未查, Aug27=$1739, Sep1=$1289
+      [null, 1739, 1289],
+      // Jul 3: Aug20=$1900, Aug27=$1789, Sep1=$1339
+      [1900, 1789, 1339],
+      // Jul 6: 未查具体价格（与Jul 3相近）
+      [null, null, null],
+    ],
+    note: "价格来源：Kayak（2026年2月22日查询），2人经济舱直飞，每人价格。Jun 25 → Sep 1 为本次查询最低价 $1,289/人（2人共 $2,578）。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1146,
+      totalPrice: 2292,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1183,
+      totalPrice: 2366,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1241,
+      totalPrice: 2482,
+      daysInChina: 63,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1278,
+      totalPrice: 2556,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1288,
+      totalPrice: 2576,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "6月25日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1146,
+      totalPrice2Pax: 2292,
+      daysInChina: 56,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-06-25/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1183,
+      totalPrice2Pax: 2366,
+      daysInChina: 49,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "6月25日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1241,
+      totalPrice2Pax: 2482,
+      daysInChina: 63,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-06-25/2026-08-27/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空",
+      airlineCode: "DL",
+      departDate: "6月25日",
+      returnDate: "9月1日",
+      pricePerPerson: 1289,
+      totalPrice2Pax: 2578,
+      daysInChina: 68,
+      cabinNote: "经济舱直飞，请在达美官网确认舱位类型",
+      warning: "⚠️ 可能为 Basic Economy（不含托运行李、不可改签），购票前请确认",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-25/2026-09-01/2adults?sort=price_a&fs=stops=0;airlines=DL",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空",
+      airlineCode: "DL",
+      departDate: "7月3日",
+      returnDate: "9月1日",
+      pricePerPerson: 1339,
+      totalPrice2Pax: 2678,
+      daysInChina: 60,
+      cabinNote: "经济舱直飞，请在达美官网确认舱位类型",
+      warning: "⚠️ 可能为 Basic Economy（不含托运行李、不可改签），购票前请确认",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-03/2026-09-01/2adults?sort=price_a&fs=stops=0;airlines=DL",
+    },
+  ],
+};
+
+// 历史查询：2026年2月22日 02:34 PST（测试查询）
+const query_2026_02_22_0234: QueryResult = {
   id: "2026-02-22_02:34",
   queryDate: "2026-02-22",
   queryDateLabel: "2026年2月22日 02:34 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -161,45 +338,35 @@ const latestQuery: QueryResult = {
       "Aug 25", "Aug 26", "Aug 27", "Aug 28",
       "Aug 30", "Aug 31", "Sep 1",
     ],
-    // prices[departIdx][returnIdx], null = 无数据
     prices: [
-      // Jun 20-25: Aug18=$1739, Aug20=$1850, Aug21=$1939, Aug22=$1789, Aug25-27=N/A, Sep1=N/A
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
-      // Jun 26-28
       [1789, 1900, 1989, 1839, null, null, null, null, null, null, null],
       [1789, 1900, 1989, 1839, null, null, null, null, null, null, null],
       [1789, 1900, 1989, 1839, null, null, null, null, null, null, null],
-      // Jun 29-30
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
       [1739, 1850, 1939, 1789, null, null, null, null, null, null, null],
-      // Jul 1-2: Aug18=N/A, Aug20=$1739, Aug21=$1739, Aug22=$1739
       [null, 1739, 1739, 1739, null, null, null, null, null, null, null],
       [null, 1739, 1739, 1739, null, null, null, null, null, null, null],
-      // Jul 3-5: Aug25=$1789, Aug26=$1789, Aug27=$1789
       [null, null, null, null, 1789, 1789, 1789, 1839, null, null, null],
       [null, null, null, null, 1789, 1789, 1789, 1839, null, null, null],
       [null, null, null, null, 1789, 1789, 1789, 1839, null, null, null],
-      // Jul 6: Aug25=$1739
       [null, null, null, null, 1739, 1739, 1739, 1789, null, null, null],
-      // Jul 7-9: Aug25=$1639 ★ BEST
       [null, null, null, null, 1639, 1639, 1639, 1689, null, null, null],
       [null, null, null, null, 1639, 1639, 1639, 1689, null, null, null],
       [null, null, null, null, 1639, 1639, 1639, 1689, null, null, null],
-      // Jul 10-12
       [null, null, null, null, 1689, 1689, 1689, 1739, 1693, 1693, null],
       [null, null, null, null, 1689, 1689, 1689, 1739, 1693, 1693, null],
       [null, null, null, null, 1639, 1639, 1639, 1689, 1693, 1693, null],
-      // Jul 13-15: Sep1=$1189 ★ LOWEST
       [null, null, null, null, 1639, 1639, 1639, 1689, 1643, 1643, 1189],
       [null, null, null, null, 1639, 1639, 1639, 1689, 1643, 1643, 1189],
       [null, null, null, null, 1639, 1639, 1639, 1689, 1643, 1643, 1189],
     ],
-    note: "⚠️ Sep 1 返回的 $1,189 标注为「LOWEST」，可能是 Basic Economy 舱位（不含托运行李、不可改签）。购票前请在达美官网确认舱位类型。",
+    note: "测试查询数据（02:34 PST）",
   },
   chongqingResults: [
     {
@@ -295,26 +462,16 @@ const latestQuery: QueryResult = {
       warning: "⚠️ 购票前请确认舱位类型",
       bookingUrl: "https://www.delta.com",
     },
-    {
-      rank: 4,
-      medal: "4️⃣",
-      route: "SEA → 上海（PVG）",
-      airline: "达美航空",
-      airlineCode: "DL",
-      departDate: "7月7–9日（周二至四）",
-      returnDate: "8月25–27日（周二至四）",
-      pricePerPerson: 1639,
-      totalPrice2Pax: 6556,
-      daysInChina: 47,
-      cabinNote: "Delta Main 舱，含1件托运行李，可改签",
-      bookingUrl: "https://www.delta.com",
-    },
   ],
 };
 
-// 历史查询记录（示例，实际可扩展）
+// ============================================================
+// 导出
+// ============================================================
+
 export const allQueryResults: QueryResult[] = [
-  latestQuery,
+  query_2026_02_22_1301,
+  query_2026_02_22_0234,
 ];
 
-export const latestQueryResult = latestQuery;
+export const latestQueryResult = query_2026_02_22_1301;
