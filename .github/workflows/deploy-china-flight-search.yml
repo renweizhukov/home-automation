@@ -55,7 +55,7 @@ jobs:
       - name: Build website
         working-directory: china-flight-search
         env:
-          VITE_BASE_PATH: /home-automation/china-flight-search/
+          VITE_BASE_PATH: /home-automation/
           NODE_ENV: production
           VITE_ANALYTICS_ENDPOINT: ""
           VITE_ANALYTICS_WEBSITE_ID: ""
