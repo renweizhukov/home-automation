@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import NotFound from "@/pages/NotFound";
 import Home from "@/pages/Home";
 import Routes from "@/pages/Routes";
+import QueryDetail from "@/pages/QueryDetail";
 import { Route, Switch, Router as WouterRouter } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -34,6 +35,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/routes" component={Routes} />
+          <Route path="/query/:id" component={QueryDetail} />
           <Route path="/404" component={NotFound} />
           <Route component={NotFound} />
         </Switch>
