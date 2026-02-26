@@ -133,12 +133,180 @@ export const staticTips = [
 // 查询结果数据（与查询时间相关）
 // ============================================================
 
-// 最新查询：2026年2月25日 12:05 PST
+// 最新查询：2026年2月26日 08:03 PST
+const query_2026_02_26_0803: QueryResult = {
+  id: "2026-02-26_08:03",
+  queryDate: "2026-02-26",
+  queryDateLabel: "2026年2月26日 08:03 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: [
+      "Jun 20",
+    ],
+    returnTimes: [
+      "Aug 20",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // Jun 20→Aug 20 = 61天 ✓
+    // 本次仅通过 Kayak 查询了 Jun 20→Aug 20 组合（2人直飞最低价）
+    prices: [
+      // Jun 20: Aug20=$2,039（Kayak 最低价，Delta Main Basic，直飞 DL129/DL128）
+      [2039],
+    ],
+    note: "价格来源：Kayak（2026年2月26日查询），2人经济舱直飞（达美 DL 129/128），每人价格。本次仅查询 Jun 20→Aug 20 组合，最低价 $2,039/人（2人共 $4,077），为 Delta Main Basic 舱（不含托运行李，不可改签）。较上次查询价格明显上涨。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1171,
+      totalPrice: 2342,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1298,
+      totalPrice: 2596,
+      daysInChina: 63,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1285,
+      totalPrice: 2570,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1244,
+      totalPrice: 2488,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1244,
+      totalPrice: 2488,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    // 注：7月9日→8月20日（42天）不满足45天最短停留要求，已排除
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "6月25日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1171,
+      totalPrice2Pax: 2342,
+      daysInChina: 56,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-06-25/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1244,
+      totalPrice2Pax: 2488,
+      daysInChina: 56,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-27/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1244,
+      totalPrice2Pax: 2488,
+      daysInChina: 49,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-27/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1285,
+      totalPrice2Pax: 2570,
+      daysInChina: 49,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空",
+      airlineCode: "DL",
+      departDate: "6月20日",
+      returnDate: "8月20日",
+      pricePerPerson: 2039,
+      totalPrice2Pax: 4077,
+      daysInChina: 61,
+      cabinNote: "Delta Main Basic 直飞（DL 129/128），不含托运行李、不可改签",
+      warning: "⚠️ Basic Economy：不含托运行李、不可改签，购票前请确认",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-20/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=DL",
+    },
+  ],
+};
+
+// 历史查询：2026年2月25日 12:05 PST
 const query_2026_02_25_1205: QueryResult = {
   id: "2026-02-25_12:05",
   queryDate: "2026-02-25",
   queryDateLabel: "2026年2月25日 12:05 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -697,9 +865,10 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_02_26_0803,
   query_2026_02_25_1205,
   query_2026_02_23_0825,
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_02_25_1205;
+export const latestQueryResult = query_2026_02_26_0803;
