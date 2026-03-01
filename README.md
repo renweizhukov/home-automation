@@ -54,6 +54,7 @@ The script uses Google Apps Script Properties for configuration:
 - `PODCAST_OPENAI_VOICE`: TTS voice (optional, default `marin`)
 - `PODCAST_OPENAI_INSTRUCTIONS`: TTS speaking style instructions (optional)
 - `KCLS_CHINESE_KIDS_LIST_URLS`: JSON array of fixed KCLS list URLs (optional)
+- `KCLS_CHINESE_KIDS_SEARCH_URLS`: JSON array of KCLS search URLs for Chinese kids books (optional)
 - `CHINESE_KIDS_AWARD_URLS`: JSON array of official Chinese award/list URLs (optional)
 
 #### Setup Notes
@@ -66,6 +67,8 @@ The script uses Google Apps Script Properties for configuration:
 - If podcast generation is enabled, ensure `OPENAI_API_KEY` is configured in Script Properties
 - Example KCLS list property:
   - `KCLS_CHINESE_KIDS_LIST_URLS=["https://kcls.bibliocommons.com/v2/list/display/209392283/1188591387"]`
+- Example KCLS search property:
+  - `KCLS_CHINESE_KIDS_SEARCH_URLS=["https://kcls.bibliocommons.com/v2/search?...","https://kcls.bibliocommons.com/v2/search?..."]`
 
 The script is located in the `DailyKidsEmail/` folder.
 

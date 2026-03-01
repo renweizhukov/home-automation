@@ -14,6 +14,7 @@
  * - PODCAST_SCRIPT_STYLE: (optional) style prompt for script generation
  * - PODCAST_LINK_SUMMARY_LIMIT: (optional) max linked URLs passed to script model, default 6
  * - KCLS_CHINESE_KIDS_LIST_URLS: (optional) JSON array of fixed KCLS Chinese kids list URLs
+ * - KCLS_CHINESE_KIDS_SEARCH_URLS: (optional) JSON array of KCLS search URLs for Chinese kids books
  * - CHINESE_KIDS_AWARD_URLS: (optional) JSON array of official award/list URLs for curated Chinese kids books
  */
 
@@ -167,6 +168,7 @@ function getConfig_() {
   const podcastOpenAiVoice = props.getProperty("PODCAST_OPENAI_VOICE") || "marin";
   const podcastOpenAiInstructions = props.getProperty("PODCAST_OPENAI_INSTRUCTIONS") || "Natural, warm, gentle young girl narrator voice, conversational pacing for kids.";
   const kclsListUrlsRaw = props.getProperty("KCLS_CHINESE_KIDS_LIST_URLS");
+  const kclsSearchUrlsRaw = props.getProperty("KCLS_CHINESE_KIDS_SEARCH_URLS");
   const awardUrlsRaw = props.getProperty("CHINESE_KIDS_AWARD_URLS");
   let kclsChineseKidsListUrls = DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS;
   if (kclsListUrlsRaw) {
@@ -177,6 +179,28 @@ function getConfig_() {
       console.log(`Invalid KCLS_CHINESE_KIDS_LIST_URLS, using default list: ${e.message || e}`);
     }
   }
+  let kclsSearchUrls = [];
+  if (kclsSearchUrlsRaw) {
+    try {
+      const parsed = JSON.parse(kclsSearchUrlsRaw);
+      if (Array.isArray(parsed) && parsed.length) {
+        kclsSearchUrls = parsed.map(u => safeText_(u)).filter(Boolean);
+      }
+    } catch (e) {
+      console.log(`Invalid KCLS_CHINESE_KIDS_SEARCH_URLS, expected JSON array: ${e.message || e}`);
+    }
+  }
+  if (kclsSearchUrls.length) {
+    const combined = kclsSearchUrls.concat(kclsChineseKidsListUrls);
+    const seen = new Set();
+    kclsChineseKidsListUrls = combined.filter(u => {
+      const key = safeText_(u);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   let chineseKidsAwardUrls = DEFAULT_CHINESE_KIDS_AWARD_URLS;
   if (awardUrlsRaw) {
     try {
@@ -459,13 +483,39 @@ function getKclsChineseKidsBooks_(listUrls, maxResults) {
   const books = [];
   const urls = (listUrls || []).slice(0, 8); // avoid too many network calls
 
+  console.log(JSON.stringify({
+    event: "kcls_books_urls_called",
+    urlCount: urls.length,
+    urls
+  }));
+
   for (const url of urls) {
     try {
+      console.log(JSON.stringify({
+        event: "kcls_books_fetch_started",
+        url
+      }));
+
       const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
       if (resp.getResponseCode() >= 400) continue;
 
       const html = resp.getContentText("UTF-8");
-      const extracted = extractKclsRecordBooks_(html);
+      const extracted = /\/v2\/search[/?#]/i.test(url)
+        ? extractKclsSearchResultBooks_(html, 14)
+        : extractKclsRecordBooks_(html);
+
+      console.log(JSON.stringify({
+        event: "kcls_books_extracted",
+        url,
+        isSearchPage: /\/v2\/search[/?#]/i.test(url),
+        extractedCount: extracted.length,
+        books: extracted.slice(0, 14).map((b, i) => ({
+          index: i + 1,
+          title: b.title,
+          link: b.link
+        }))
+      }));
+
       extracted.forEach(b => books.push({
         title: b.title,
         authors: b.authors || "",
@@ -477,7 +527,19 @@ function getKclsChineseKidsBooks_(listUrls, maxResults) {
     }
   }
 
-  return dedupeBooks_(books).slice(0, maxResults);
+  const deduped = dedupeBooks_(books).slice(0, maxResults);
+  console.log(JSON.stringify({
+    event: "kcls_books_final_output",
+    sourceUrlCount: urls.length,
+    rawCount: books.length,
+    dedupedCount: deduped.length,
+    books: deduped.slice(0, 14).map((b, i) => ({
+      index: i + 1,
+      title: b.title,
+      link: b.link
+    }))
+  }));
+  return deduped;
 }
 
 function extractKclsRecordBooks_(html) {
@@ -486,24 +548,186 @@ function extractKclsRecordBooks_(html) {
   const linkAndTitleRe = /<a[^>]+href="([^"]*(?:\/v2\/record\/S82C\d+|\/item\/show\/\d+)[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
   let m;
   while ((m = linkAndTitleRe.exec(html)) !== null) {
-    let link = safeText_(m[1]);
+    const link = normalizeKclsRecordUrl_(m[1]) || normalizeKclsRecordUrlFromLegacyItemPath_(m[1]);
     if (!link) continue;
-    if (!/^https?:\/\//i.test(link)) {
-      link = `https://kcls.bibliocommons.com${link.startsWith("/") ? "" : "/"}${link}`;
-    }
     if (seenLinks.has(link)) continue;
     seenLinks.add(link);
 
     const anchorTag = m[0];
-    const ariaMatch = /aria-label="([^"]+)"/i.exec(anchorTag);
+    const ariaTitle = getHtmlAttr_(anchorTag, "aria-label");
+    const titleAttr = getHtmlAttr_(anchorTag, "title");
     const textTitle = decodeHtmlEntities_(stripHtmlTags_(m[2]));
-    const ariaTitle = ariaMatch ? decodeHtmlEntities_(safeText_(ariaMatch[1])) : "";
-    const title = safeText_(textTitle || ariaTitle);
+    const title = safeText_(decodeHtmlEntities_(textTitle || ariaTitle || titleAttr));
 
     if (!title || title.length > 180) continue;
     books.push({ title, authors: "", link, blurb: "" });
   }
   return books;
+}
+
+function extractKclsSearchResultBooks_(html, limit) {
+  const target = Math.max(1, parseInt(limit || "14", 10) || 14);
+  const books = [];
+  const seen = new Set();
+
+  function addBook_(titleCandidate, urlCandidate) {
+    const title = safeText_(decodeHtmlEntities_(decodeJsonEscapes_(stripHtmlTags_(titleCandidate || ""))));
+    const link = normalizeKclsRecordUrl_(urlCandidate);
+    if (!title || !link || title.length > 220) return;
+    if (seen.has(link)) return;
+    seen.add(link);
+    books.push({ title, authors: "", link, blurb: "" });
+  }
+
+  // 1) Normal search result anchors.
+  const anchorRe = /<a\b[^>]*href=(["'])([^"']*\/v2\/record\/S82C\d+[^"']*)\1[^>]*>([\s\S]*?)<\/a>/gi;
+  let m;
+  while ((m = anchorRe.exec(html)) !== null) {
+    const anchorTag = m[0];
+    addBook_(
+      getHtmlAttr_(anchorTag, "aria-label") || getHtmlAttr_(anchorTag, "title") || m[3],
+      m[2]
+    );
+    if (books.length >= target) return books.slice(0, target);
+  }
+
+  // 2) Embedded JSON style blocks: title + record URL pairs.
+  const jsonTitleUrlPairs = [
+    /"title"\s*:\s*"((?:\\.|[^"])*)"[^{]{0,300}?"url"\s*:\s*"((?:\\.|[^"])*\/v2\/record\/S82C\d+(?:\\.|[^"])*)"/g,
+    /"name"\s*:\s*"((?:\\.|[^"])*)"[^{]{0,300}?"url"\s*:\s*"((?:\\.|[^"])*\/v2\/record\/S82C\d+(?:\\.|[^"])*)"/g,
+    /"url"\s*:\s*"((?:\\.|[^"])*\/v2\/record\/S82C\d+(?:\\.|[^"])*)"[^{]{0,300}?"(?:title|name)"\s*:\s*"((?:\\.|[^"])*)"/g
+  ];
+
+  for (let i = 0; i < jsonTitleUrlPairs.length; i++) {
+    const re = jsonTitleUrlPairs[i];
+    while ((m = re.exec(html)) !== null) {
+      const url = i === 2 ? m[1] : m[2];
+      const title = i === 2 ? m[2] : m[1];
+      addBook_(title, url);
+      if (books.length >= target) return books.slice(0, target);
+    }
+  }
+
+  // 3) Embedded JSON style blocks: title + recordId pairs.
+  const jsonTitleRecordIdPairs = [
+    /"(?:title|name)"\s*:\s*"((?:\\.|[^"])*)"[^{]{0,300}?"(?:recordId|id)"\s*:\s*"(S82C\d+)"/g,
+    /"(?:recordId|id)"\s*:\s*"(S82C\d+)"[^{]{0,300}?"(?:title|name)"\s*:\s*"((?:\\.|[^"])*)"/g
+  ];
+
+  for (let i = 0; i < jsonTitleRecordIdPairs.length; i++) {
+    const re = jsonTitleRecordIdPairs[i];
+    while ((m = re.exec(html)) !== null) {
+      const title = i === 0 ? m[1] : m[2];
+      const recordId = i === 0 ? m[2] : m[1];
+      addBook_(title, `https://kcls.bibliocommons.com/v2/record/${recordId}`);
+      if (books.length >= target) return books.slice(0, target);
+    }
+  }
+
+  return books.slice(0, target);
+}
+
+function getKclsBooksFromSearchPage_(searchUrl, limit) {
+  const url = safeText_(searchUrl) || getKclsChineseKidsSearchUrlsFromProperties_()[0] || "";
+  if (!url) {
+    throw new Error("Missing Script Property: KCLS_CHINESE_KIDS_SEARCH_URLS");
+  }
+  const target = Math.max(1, parseInt(limit || "14", 10) || 14);
+  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  if (resp.getResponseCode() >= 400) {
+    throw new Error(`KCLS search fetch failed (${resp.getResponseCode()}): ${url}`);
+  }
+  const html = resp.getContentText("UTF-8");
+  return extractKclsSearchResultBooks_(html, target);
+}
+
+function getKclsSearchPageTitleAndRecordUrls_(searchUrl, limit) {
+  return getKclsBooksFromSearchPage_(searchUrl, limit).map(b => ({
+    title: b.title,
+    recordUrl: b.link
+  }));
+}
+
+function getKclsBooksFromSearchPages_(searchUrls, perUrlLimit, totalLimit) {
+  const urls = Array.isArray(searchUrls) && searchUrls.length
+    ? searchUrls.map(u => safeText_(u)).filter(Boolean)
+    : getKclsChineseKidsSearchUrlsFromProperties_();
+  if (!urls.length) {
+    throw new Error("Missing Script Property: KCLS_CHINESE_KIDS_SEARCH_URLS");
+  }
+
+  const perUrl = Math.max(1, parseInt(perUrlLimit || "14", 10) || 14);
+  const overall = Math.max(1, parseInt(totalLimit || `${perUrl * urls.length}`, 10) || (perUrl * urls.length));
+  const merged = [];
+
+  urls.forEach(url => {
+    const fromOneUrl = getKclsBooksFromSearchPage_(url, perUrl);
+    fromOneUrl.forEach(b => merged.push(b));
+  });
+
+  return dedupeBooks_(merged).slice(0, overall);
+}
+
+function getKclsSearchPagesTitleAndRecordUrls_(searchUrls, perUrlLimit, totalLimit) {
+  return getKclsBooksFromSearchPages_(searchUrls, perUrlLimit, totalLimit).map(b => ({
+    title: b.title,
+    recordUrl: b.link
+  }));
+}
+
+function debugKclsSearchPageParser_() {
+  const books = getKclsSearchPagesTitleAndRecordUrls_(null, 14);
+  console.log(JSON.stringify({
+    event: "kcls_search_books_parsed",
+    count: books.length,
+    books
+  }, null, 2));
+  return books;
+}
+
+function getKclsChineseKidsSearchUrlsFromProperties_() {
+  const raw = PropertiesService.getScriptProperties().getProperty("KCLS_CHINESE_KIDS_SEARCH_URLS");
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(u => safeText_(u)).filter(Boolean);
+  } catch (e) {
+    console.log(`Invalid KCLS_CHINESE_KIDS_SEARCH_URLS, expected JSON array: ${e.message || e}`);
+    return [];
+  }
+}
+
+function normalizeKclsRecordUrl_(rawUrl) {
+  const normalized = decodeJsonEscapes_(decodeHtmlEntities_(safeText_(rawUrl)));
+  const m = /\/v2\/record\/(S82C\d+)/i.exec(normalized);
+  if (!m) return "";
+  return `https://kcls.bibliocommons.com/v2/record/${m[1]}`;
+}
+
+function normalizeKclsRecordUrlFromLegacyItemPath_(rawUrl) {
+  const normalized = decodeJsonEscapes_(decodeHtmlEntities_(safeText_(rawUrl)));
+  if (!/\/item\/show\/\d+/i.test(normalized)) return "";
+  const absolute = /^https?:\/\//i.test(normalized)
+    ? normalized
+    : `https://kcls.bibliocommons.com${normalized.startsWith("/") ? "" : "/"}${normalized}`;
+  return absolute;
+}
+
+function getHtmlAttr_(tagHtml, attrName) {
+  const re = new RegExp(`${attrName}\\s*=\\s*("([^"]*)"|'([^']*)')`, "i");
+  const m = re.exec(tagHtml || "");
+  if (!m) return "";
+  return decodeHtmlEntities_(decodeJsonEscapes_(safeText_(m[2] || m[3] || "")));
+}
+
+function decodeJsonEscapes_(s) {
+  return safeText_(s)
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/\\\//g, "/")
+    .replace(/\\"/g, "\"")
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, "\\");
 }
 
 function getCuratedChineseKidsBooks_(awardUrls, maxResults) {
