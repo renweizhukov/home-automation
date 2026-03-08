@@ -6,7 +6,7 @@
  * - NEWS_RSS_URLS: JSON array string, e.g. ["https://feeds.bbci.co.uk/news/world/rss.xml"]
  * - GOOGLE_BOOKS_API_KEY: (optional) Google Books API key
  * - OPENAI_API_KEY: (optional) OpenAI API key for podcast audio generation
- * - PODCAST_ENABLED: (optional) true/false. Default true when OPENAI_API_KEY is set
+ * - PODCAST_ENABLED: (optional) true/false. Default false
  * - PODCAST_OPENAI_MODEL: (optional) default "gpt-4o-mini-tts"
  * - PODCAST_OPENAI_VOICE: (optional) default "marin"
  * - PODCAST_OPENAI_INSTRUCTIONS: (optional) speaking style guidance
@@ -160,7 +160,7 @@ function getConfig_() {
   const podcastEnabledRaw = props.getProperty("PODCAST_ENABLED");
   const podcastEnabled = podcastEnabledRaw
     ? podcastEnabledRaw.toLowerCase() === "true"
-    : !!openAiApiKey;
+    : false;
   const podcastScriptModel = props.getProperty("PODCAST_SCRIPT_MODEL") || "gpt-4.1-mini";
   const podcastScriptStyle = props.getProperty("PODCAST_SCRIPT_STYLE") || "Fun, catchy, kid-friendly radio host style with playful transitions and curiosity hooks.";
   const podcastLinkSummaryLimit = Math.max(0, parseInt(props.getProperty("PODCAST_LINK_SUMMARY_LIMIT") || "6", 10) || 6);

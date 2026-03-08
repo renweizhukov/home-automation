@@ -46,7 +46,7 @@ The script uses Google Apps Script Properties for configuration:
 - `NEWS_RSS_URLS`: JSON array string of RSS feed URLs, e.g. `["https://feeds.npr.org/1004/rss.xml"]` (required)
 - `GOOGLE_BOOKS_API_KEY`: Google Books API key (optional, but recommended)
 - `OPENAI_API_KEY`: OpenAI API key for podcast generation (optional)
-- `PODCAST_ENABLED`: `true`/`false` (optional). Defaults to `true` when `OPENAI_API_KEY` is set
+- `PODCAST_ENABLED`: `true`/`false` (optional). Defaults to `false`
 - `PODCAST_SCRIPT_MODEL`: Script-generation model (optional, default `gpt-4.1-mini`)
 - `PODCAST_SCRIPT_STYLE`: Style guidance for script model (optional)
 - `PODCAST_LINK_SUMMARY_LIMIT`: Max number of links passed to script model context (optional, default `6`)
