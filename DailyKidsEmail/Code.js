@@ -48,6 +48,21 @@ const DEFAULT_CURATED_CHINESE_KIDS_TITLES = [
   "守护神"
 ];
 
+const RETRYABLE_FETCH_STATUS_CODES_ = {
+  408: true,
+  425: true,
+  429: true,
+  500: true,
+  502: true,
+  503: true,
+  504: true
+};
+
+const BOOKS_CACHE_KEYS_ = {
+  english: "DAILY_KIDS_EMAIL_LAST_ENGLISH_BOOKS",
+  chinese: "DAILY_KIDS_EMAIL_LAST_CHINESE_BOOKS"
+};
+
 function dailyJob() {
   const cfg = getConfig_();
 
@@ -288,6 +303,122 @@ function getNewsItems_(rssUrls, limit) {
   return deduped;
 }
 
+function fetchWithRetry_(url, options, requestLabel) {
+  const opts = Object.assign({ muteHttpExceptions: true }, options || {});
+  const label = safeText_(requestLabel) || safeText_(url) || "request";
+  const maxAttempts = 3;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const resp = UrlFetchApp.fetch(url, opts);
+      const status = resp.getResponseCode();
+      if (!RETRYABLE_FETCH_STATUS_CODES_[status]) {
+        return resp;
+      }
+
+      lastError = new Error(`${label} returned HTTP ${status}`);
+      console.log(JSON.stringify({
+        event: "fetch_retryable_status",
+        label,
+        url,
+        attempt,
+        status
+      }));
+    } catch (e) {
+      if (!isRetryableFetchError_(e)) throw e;
+      lastError = e;
+      console.log(JSON.stringify({
+        event: "fetch_retryable_exception",
+        label,
+        url,
+        attempt,
+        error: e.message || String(e)
+      }));
+    }
+
+    if (attempt < maxAttempts) {
+      Utilities.sleep(getRetryDelayMs_(attempt));
+    }
+  }
+
+  throw lastError || new Error(`${label} failed after retries`);
+}
+
+function isRetryableFetchError_(error) {
+  const msg = safeText_(error && error.message ? error.message : error).toLowerCase();
+  return (
+    msg.includes("service temporarily unavailable") ||
+    msg.includes("address unavailable") ||
+    msg.includes("timed out") ||
+    msg.includes("timeout") ||
+    msg.includes("exception:") ||
+    msg.includes("socket") ||
+    msg.includes("temporarily")
+  );
+}
+
+function getRetryDelayMs_(attempt) {
+  const baseMs = 600;
+  const jitterMs = Math.floor(Math.random() * 250);
+  return (baseMs * Math.pow(2, attempt - 1)) + jitterMs;
+}
+
+function getBooksSourceSafely_(sourceName, loader) {
+  try {
+    const books = loader() || [];
+    console.log(JSON.stringify({
+      event: "books_source_succeeded",
+      source: sourceName,
+      count: books.length
+    }));
+    return { books, error: "" };
+  } catch (e) {
+    const msg = safeText_(e && e.message ? e.message : e);
+    console.log(JSON.stringify({
+      event: "books_source_failed",
+      source: sourceName,
+      error: msg
+    }));
+    return { books: [], error: `${sourceName}: ${msg}` };
+  }
+}
+
+function saveBookListCache_(cacheKey, books) {
+  const items = Array.isArray(books) ? books.slice(0, 12) : [];
+  if (!items.length) return;
+
+  PropertiesService.getScriptProperties().setProperty(cacheKey, JSON.stringify({
+    savedAt: new Date().toISOString(),
+    books: items
+  }));
+}
+
+function getBookListCache_(cacheKey, limit) {
+  const raw = PropertiesService.getScriptProperties().getProperty(cacheKey);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    const savedAt = safeText_(parsed && parsed.savedAt);
+    const books = Array.isArray(parsed && parsed.books) ? parsed.books : [];
+
+    return books.slice(0, limit).map(b => {
+      const book = Object.assign({}, b);
+      const cacheNote = savedAt
+        ? `Cached fallback from ${savedAt.slice(0, 10)}`
+        : "Cached fallback";
+      book.blurb = book.blurb
+        ? `${book.blurb} (${cacheNote})`
+        : cacheNote;
+      return book;
+    });
+  } catch (e) {
+    console.log(`Invalid cached book list for ${cacheKey}: ${e.message || e}`);
+    return [];
+  }
+}
+
 function getPopularKidsBooks_(limit, apiKey) {
   // Run two queries and combine:
   // 1) Recent books (published in the past 5 years)
@@ -313,6 +444,7 @@ function getPopularKidsBooks_(limit, apiKey) {
   const nonFallbackQueries = queryVariants.filter(q => q !== fallbackQuery);
   const recentCandidates = shuffleArray_(nonFallbackQueries).slice(0, 2).concat([fallbackQuery]);
   const allTimeCandidates = shuffleArray_(nonFallbackQueries).slice(0, 2).concat([fallbackQuery]);
+  const sourceErrors = [];
 
   let recentQuery = "";
   let recentStart = 0;
@@ -321,22 +453,26 @@ function getPopularKidsBooks_(limit, apiKey) {
   for (let i = 0; i < recentCandidates.length; i++) {
     const query = recentCandidates[i];
     const start = (i === 0) ? Math.floor(Math.random() * 4) : 0;
-    const recentBooksRaw = getGoogleBooks_(
-      query,
-      "en",
-      "US",
-      maxResults,
-      start,
-      apiKey,
-      { orderBy: "newest" }
-    );
-    const filtered = recentBooksRaw.filter(b => (b.publishedYear || 0) >= recentCutoffYear);
-    recentAttempts.push({ query, start, rawCount: recentBooksRaw.length, count: filtered.length });
-    if (filtered.length > 0) {
-      recentQuery = query;
-      recentStart = start;
-      recentBooks = filtered;
-      break;
+    try {
+      const recentBooksRaw = getGoogleBooks_(
+        query,
+        "en",
+        "US",
+        maxResults,
+        start,
+        apiKey,
+        { orderBy: "newest" }
+      );
+      const filtered = recentBooksRaw.filter(b => (b.publishedYear || 0) >= recentCutoffYear);
+      recentAttempts.push({ query, start, rawCount: recentBooksRaw.length, count: filtered.length });
+      if (filtered.length > 0) {
+        recentQuery = query;
+        recentStart = start;
+        recentBooks = filtered;
+        break;
+      }
+    } catch (e) {
+      recentAttempts.push({ query, start, error: e.message || String(e) });
     }
   }
 
@@ -347,21 +483,29 @@ function getPopularKidsBooks_(limit, apiKey) {
   for (let i = 0; i < allTimeCandidates.length; i++) {
     const query = allTimeCandidates[i];
     const start = (i === 0) ? Math.floor(Math.random() * 6) : 0;
-    const fetched = getGoogleBooks_(
-      query,
-      "en",
-      "US",
-      maxResults,
-      start,
-      apiKey
-    );
-    allTimeAttempts.push({ query, start, count: fetched.length });
-    if (fetched.length > 0) {
-      allTimeQuery = query;
-      allTimeStart = start;
-      allTimeBooks = fetched;
-      break;
+    try {
+      const fetched = getGoogleBooks_(
+        query,
+        "en",
+        "US",
+        maxResults,
+        start,
+        apiKey
+      );
+      allTimeAttempts.push({ query, start, count: fetched.length });
+      if (fetched.length > 0) {
+        allTimeQuery = query;
+        allTimeStart = start;
+        allTimeBooks = fetched;
+        break;
+      }
+    } catch (e) {
+      allTimeAttempts.push({ query, start, error: e.message || String(e) });
     }
+  }
+
+  if (!recentBooks.length && !allTimeBooks.length) {
+    sourceErrors.push("Google Books returned no usable English results");
   }
 
   const recentPool = shuffleArray_(dedupeBooksByTitle_(recentBooks));
@@ -392,6 +536,20 @@ function getPopularKidsBooks_(limit, apiKey) {
   if (selected.length < limit) pickFromPool_(recentPool, limit - selected.length);
   if (selected.length < limit) pickFromPool_(allTimePool, limit - selected.length);
 
+  let openLibraryCount = 0;
+  if (selected.length < limit) {
+    const openLibraryResult = getBooksSourceSafely_("Open Library English fallback", () =>
+      getOpenLibraryEnglishKidsBooks_(maxResults)
+    );
+    if (openLibraryResult.error) {
+      sourceErrors.push(openLibraryResult.error);
+    } else {
+      const fallbackPool = shuffleArray_(dedupeBooksByTitle_(openLibraryResult.books));
+      openLibraryCount = fallbackPool.length;
+      pickFromPool_(fallbackPool, limit - selected.length);
+    }
+  }
+
   console.log(JSON.stringify({
     event: "books_dual_query",
     recentQuery,
@@ -405,6 +563,7 @@ function getPopularKidsBooks_(limit, apiKey) {
     allTimeAttempts,
     allTimeCount: allTimeBooks.length,
     allTimePoolCount: allTimePool.length,
+    openLibraryCount,
     pickedRecent,
     pickedAllTime,
     finalCount: selected.length,
@@ -419,8 +578,24 @@ function getPopularKidsBooks_(limit, apiKey) {
     count: shuffled.length,
     limit
   }));
-  
-  return shuffled.slice(0, limit);
+
+  const finalBooks = shuffled.slice(0, limit);
+  if (finalBooks.length) {
+    saveBookListCache_(BOOKS_CACHE_KEYS_.english, finalBooks);
+    return finalBooks;
+  }
+
+  const cachedBooks = getBookListCache_(BOOKS_CACHE_KEYS_.english, limit);
+  if (cachedBooks.length) {
+    console.log(JSON.stringify({
+      event: "books_cache_fallback_used",
+      language: "english",
+      count: cachedBooks.length
+    }));
+    return cachedBooks;
+  }
+
+  throw new Error(sourceErrors.join(" | ") || "No English books found");
 }
 
 function getPopularChineseKidsBooks_(limit, apiKey, kclsListUrls, awardUrls) {
@@ -431,26 +606,48 @@ function getPopularChineseKidsBooks_(limit, apiKey, kclsListUrls, awardUrls) {
   // 4) Google Books as last fallback
   const fetchMultiplier = 4;
   const maxResults = Math.min(Math.max(limit * fetchMultiplier, 20), 40);
+  const sourceErrors = [];
 
-  const kclsBooks = getKclsChineseKidsBooks_(kclsListUrls || DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS, maxResults);
-  const curatedBooks = getCuratedChineseKidsBooks_(awardUrls || DEFAULT_CHINESE_KIDS_AWARD_URLS, maxResults);
-  const openLibraryBooks = getOpenLibraryChineseKidsBooks_(maxResults);
+  const kclsResult = getBooksSourceSafely_("KCLS Chinese lists", () =>
+    getKclsChineseKidsBooks_(kclsListUrls || DEFAULT_KCLS_CHINESE_KIDS_LIST_URLS, maxResults)
+  );
+  const curatedResult = getBooksSourceSafely_("Curated Chinese award lists", () =>
+    getCuratedChineseKidsBooks_(awardUrls || DEFAULT_CHINESE_KIDS_AWARD_URLS, maxResults)
+  );
+  if (kclsResult.error) sourceErrors.push(kclsResult.error);
+  if (curatedResult.error) sourceErrors.push(curatedResult.error);
+
+  const kclsBooks = kclsResult.books;
+  const curatedBooks = curatedResult.books;
+  let openLibraryBooks = [];
+  let googleBooks = [];
 
   console.log(JSON.stringify({
     event: "chinese_books_hybrid_primary",
     kclsCount: kclsBooks.length,
-    curatedCount: curatedBooks.length,
-    openLibraryCount: openLibraryBooks.length
+    curatedCount: curatedBooks.length
   }));
 
   let merged = dedupeBooks_(
     shuffleArray_(kclsBooks)
       .concat(shuffleArray_(curatedBooks))
-      .concat(shuffleArray_(openLibraryBooks))
   );
+  let filtered = filterChineseKidsBooks_(merged);
 
-  let googleBooks = [];
-  if (merged.length < limit) {
+  if (filtered.length < Math.max(limit, 8)) {
+    const openLibraryResult = getBooksSourceSafely_("Open Library Chinese fallback", () =>
+      getOpenLibraryChineseKidsBooks_(maxResults)
+    );
+    if (openLibraryResult.error) {
+      sourceErrors.push(openLibraryResult.error);
+    } else {
+      openLibraryBooks = openLibraryResult.books;
+      merged = dedupeBooks_(merged.concat(shuffleArray_(openLibraryBooks)));
+      filtered = filterChineseKidsBooks_(merged);
+    }
+  }
+
+  if (filtered.length < limit) {
     const queryVariants = [
       'subject:"Children\'s stories, Chinese"',
       'subject:"juvenile fiction" 儿童文学',
@@ -461,7 +658,14 @@ function getPopularChineseKidsBooks_(limit, apiKey, kclsListUrls, awardUrls) {
     const randomQuery = queryVariants[Math.floor(Math.random() * queryVariants.length)];
     const randomStart = Math.floor(Math.random() * 11);
 
-    googleBooks = getGoogleBooks_(randomQuery, "zh", "US", maxResults, randomStart, apiKey);
+    const googleBooksResult = getBooksSourceSafely_("Google Books Chinese fallback", () =>
+      getGoogleBooks_(randomQuery, "zh", "US", maxResults, randomStart, apiKey)
+    );
+    if (googleBooksResult.error) {
+      sourceErrors.push(googleBooksResult.error);
+    } else {
+      googleBooks = googleBooksResult.books;
+    }
 
     console.log(JSON.stringify({
       event: "chinese_books_google",
@@ -472,11 +676,38 @@ function getPopularChineseKidsBooks_(limit, apiKey, kclsListUrls, awardUrls) {
     }));
 
     merged = dedupeBooks_(merged.concat(shuffleArray_(googleBooks)));
+    filtered = filterChineseKidsBooks_(merged);
   }
 
-  const filtered = filterChineseKidsBooks_(merged);
   const ranked = rankChineseKidsBooks_(filtered);
-  return ranked.slice(0, limit);
+  const finalBooks = ranked.slice(0, limit);
+
+  console.log(JSON.stringify({
+    event: "chinese_books_hybrid_final",
+    kclsCount: kclsBooks.length,
+    curatedCount: curatedBooks.length,
+    openLibraryCount: openLibraryBooks.length,
+    googleCount: googleBooks.length,
+    filteredCount: filtered.length,
+    finalCount: finalBooks.length
+  }));
+
+  if (finalBooks.length) {
+    saveBookListCache_(BOOKS_CACHE_KEYS_.chinese, finalBooks);
+    return finalBooks;
+  }
+
+  const cachedBooks = getBookListCache_(BOOKS_CACHE_KEYS_.chinese, limit);
+  if (cachedBooks.length) {
+    console.log(JSON.stringify({
+      event: "books_cache_fallback_used",
+      language: "chinese",
+      count: cachedBooks.length
+    }));
+    return cachedBooks;
+  }
+
+  throw new Error(sourceErrors.join(" | ") || "No Chinese books found");
 }
 
 function getKclsChineseKidsBooks_(listUrls, maxResults) {
@@ -496,7 +727,7 @@ function getKclsChineseKidsBooks_(listUrls, maxResults) {
         url
       }));
 
-      const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      const resp = fetchWithRetry_(url, { muteHttpExceptions: true }, "KCLS list");
       if (resp.getResponseCode() >= 400) continue;
 
       const html = resp.getContentText("UTF-8");
@@ -633,7 +864,7 @@ function getKclsBooksFromSearchPage_(searchUrl, limit) {
     throw new Error("Missing Script Property: KCLS_CHINESE_KIDS_SEARCH_URLS");
   }
   const target = Math.max(1, parseInt(limit || "14", 10) || 14);
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  const resp = fetchWithRetry_(url, { muteHttpExceptions: true }, "KCLS search");
   if (resp.getResponseCode() >= 400) {
     throw new Error(`KCLS search fetch failed (${resp.getResponseCode()}): ${url}`);
   }
@@ -736,7 +967,7 @@ function getCuratedChineseKidsBooks_(awardUrls, maxResults) {
 
   for (const url of urls) {
     try {
-      const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      const resp = fetchWithRetry_(url, { muteHttpExceptions: true }, "Curated Chinese list");
       if (resp.getResponseCode() >= 400) continue;
 
       const html = resp.getContentText("UTF-8");
@@ -810,7 +1041,7 @@ function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, a
   if (opts.orderBy) url += `&orderBy=${encodeURIComponent(opts.orderBy)}`;
   if (apiKey) url += `&key=${encodeURIComponent(apiKey)}`;
 
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  const resp = fetchWithRetry_(url, { muteHttpExceptions: true }, "Google Books");
   if (resp.getResponseCode() >= 400) {
     throw new Error(`Google Books error ${resp.getResponseCode()}: ${resp.getContentText()}`);
   }
@@ -838,43 +1069,109 @@ function getGoogleBooks_(query, langRestrict, country, maxResults, startIndex, a
   return books;
 }
 
-function getOpenLibraryChineseKidsBooks_(maxResults) {
+function getOpenLibraryEnglishKidsBooks_(maxResults) {
   const books = [];
-  const queries = [
-    "subject:\"Children's stories, Chinese\"",
-    "儿童文学",
-    "少儿故事"
+  const queryPlans = [
+    [
+      `https://openlibrary.org/search.json?subject=${encodeURIComponent("Children's stories")}&language=eng&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`,
+      `https://openlibrary.org/search.json?q=${encodeURIComponent('subject:"Children\'s stories"')}&language=eng&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ],
+    [
+      `https://openlibrary.org/search.json?subject=${encodeURIComponent("Juvenile fiction")}&language=eng&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`,
+      `https://openlibrary.org/search.json?q=${encodeURIComponent('subject:"juvenile fiction"')}&language=eng&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ],
+    [
+      `https://openlibrary.org/search.json?q=${encodeURIComponent("kids adventure stories")}&language=eng&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ]
   ];
 
-  for (const q of queries) {
-    const url =
-      `https://openlibrary.org/search.json` +
-      `?q=${encodeURIComponent(q)}` +
-      `&language=chi` +
-      `&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`;
+  queryPlans.forEach(urls => {
+    try {
+      const docs = getOpenLibrarySearchDocs_(urls);
+      docs.forEach(d => {
+        const title = safeText_(d.title);
+        if (!title) return;
 
-    const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    if (resp.getResponseCode() >= 400) continue;
+        const authors = (d.author_name || []).slice(0, 2).join(", ");
+        const link = d.key ? `https://openlibrary.org${d.key}` : "";
+        if (!link) return;
 
-    const data = JSON.parse(resp.getContentText("UTF-8"));
-    for (const d of (data.docs || [])) {
-      const title = safeText_(d.title);
-      if (!title) continue;
-
-      const authors = (d.author_name || []).slice(0, 2).join(", ");
-      const link = d.key ? `https://openlibrary.org${d.key}` : "";
-      if (!link) continue;
-
-      books.push({
-        title,
-        authors,
-        link,
-        blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
+        books.push({
+          title,
+          authors,
+          link,
+          blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
+        });
       });
+    } catch (e) {
+      console.log(`Open Library English query plan failed: ${e.message || e}`);
+    }
+  });
+
+  return dedupeBooks_(books);
+}
+
+function getOpenLibraryChineseKidsBooks_(maxResults) {
+  const books = [];
+  const queryPlans = [
+    [
+      `https://openlibrary.org/search.json?subject=${encodeURIComponent("Children's stories, Chinese")}&language=chi&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`,
+      `https://openlibrary.org/search.json?q=${encodeURIComponent('subject:"Children\'s stories, Chinese"')}&language=chi&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ],
+    [
+      `https://openlibrary.org/search.json?q=${encodeURIComponent("儿童文学")}&language=chi&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ],
+    [
+      `https://openlibrary.org/search.json?q=${encodeURIComponent("少儿故事")}&language=chi&limit=${Math.min(Math.max(Math.floor(maxResults / 2), 10), 25)}`
+    ]
+  ];
+
+  queryPlans.forEach(urls => {
+    try {
+      const docs = getOpenLibrarySearchDocs_(urls);
+      docs.forEach(d => {
+        const title = safeText_(d.title);
+        if (!title) return;
+
+        const authors = (d.author_name || []).slice(0, 2).join(", ");
+        const link = d.key ? `https://openlibrary.org${d.key}` : "";
+        if (!link) return;
+
+        books.push({
+          title,
+          authors,
+          link,
+          blurb: d.first_publish_year ? `First published: ${d.first_publish_year}` : ""
+        });
+      });
+    } catch (e) {
+      console.log(`Open Library Chinese query plan failed: ${e.message || e}`);
+    }
+  });
+
+  return dedupeBooks_(books);
+}
+
+function getOpenLibrarySearchDocs_(urls) {
+  let lastError = null;
+
+  for (const url of (urls || [])) {
+    try {
+      const resp = fetchWithRetry_(url, { muteHttpExceptions: true }, "Open Library");
+      if (resp.getResponseCode() >= 400) {
+        lastError = new Error(`Open Library error ${resp.getResponseCode()}: ${url}`);
+        continue;
+      }
+
+      const data = JSON.parse(resp.getContentText("UTF-8"));
+      return data.docs || [];
+    } catch (e) {
+      lastError = e;
     }
   }
 
-  return dedupeBooks_(books);
+  if (lastError) throw lastError;
+  return [];
 }
 
 function parsePublishedYear_(publishedDateText) {
