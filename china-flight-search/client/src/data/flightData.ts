@@ -133,12 +133,196 @@ export const staticTips = [
 // 查询结果数据（与查询时间相关）
 // ============================================================
 
-// 最新查询：2026年4月26日 08:03 PST
+// 最新查询：2026年4月28日 08:04 PST
+const query_2026_04_28_0804: QueryResult = {
+  id: "2026-04-28_08:04",
+  queryDate: "2026-04-28",
+  queryDateLabel: "2026年4月28日 08:04 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Google Flights 日期矩阵）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 26", "Jun 28", "Jun 29",
+      "Jul 6", "Jul 8", "Jul 10", "Jul 11", "Jul 12",
+    ],
+    returnTimes: [
+      "Aug 22", "Aug 23", "Aug 24", "Aug 25", "Aug 26", "Aug 27",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Google Flights 日期矩阵（全部航空公司），2026年4月28日查询，每人价格
+    // 最低价：$1,599/人（Jul 6 → Aug 25，50天），2人共 $3,198
+    // 注意：达美航空不运营 SEA→PVG 航线，最低价为 Alaska/Condor/中国东方航空联营票（经停PDX、FRA）
+    prices: [
+      // Jun 26: Aug22=null(57d✓), Aug23=$1,777✓(58d), Aug24=$1,777✓(59d), Aug25=$1,777✓(60d), Aug26=$1,839✓(61d), Aug27=$1,777✓(62d)
+      [null, 1777, 1777, 1777, 1839, 1777],
+      // Jun 28: Aug22=$1,777✓(55d), Aug23=$1,777✓(56d), Aug24=$1,777✓(57d), Aug25=$1,777✓(58d), Aug26=$1,839✓(59d), Aug27=$1,777✓(60d)
+      [1777, 1777, 1777, 1777, 1839, 1777],
+      // Jun 29: Aug22=$1,777✓(54d), Aug23=$1,777✓(55d), Aug24=$1,777✓(56d), Aug25=$1,777✓(57d), Aug26=$1,809✓(58d), Aug27=$1,777✓(59d)
+      [1777, 1777, 1777, 1777, 1809, 1777],
+      // Jul 6: Aug22=null(47d✓), Aug23=null(48d✓), Aug24=null(49d✓), Aug25=$1,599✓(50d), Aug26=null, Aug27=null
+      [null, null, null, 1599, null, null],
+      // Jul 8: Aug22=null(45d✓), Aug23=null(46d✓), Aug24=null(47d✓), Aug25=null, Aug26=$1,680✓(49d), Aug27=null
+      [null, null, null, null, 1680, null],
+      // Jul 10: Aug22=null(43d✗), Aug23=$1,777✓(44d✗→skip), Aug24=$1,777✓(45d), Aug25=$1,777✓(46d), Aug26=null, Aug27=$1,777✓(48d)
+      [null, null, 1777, 1777, null, 1777],
+      // Jul 11: Aug22=null(42d✗), Aug23=null(43d✗), Aug24=null(44d✗), Aug25=$1,646✓(45d), Aug26=null, Aug27=null
+      [null, null, null, 1646, null, null],
+      // Jul 12: Aug22=null(41d✗), Aug23=null(42d✗), Aug24=$1,777✓(43d✗→skip), Aug25=null, Aug26=null, Aug27=$1,777✓(46d)
+      [null, null, null, null, null, 1777],
+    ],
+    note: "价格来源：Google Flights 日期矩阵（全部航空公司），2026年4月28日查询，每人价格。最低价 $1,599/人（Jul 6 → Aug 25，50天），2人共 $3,198。⚠️ 注意：达美航空不运营 SEA→PVG 直飞航线，最低价为 Alaska/Condor/中国东方航空联营票（经停 PDX 和 FRA，约28–30小时）。如需直飞上海，请考虑其他选项。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1828,
+      totalPrice: 3656,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1687,
+      totalPrice: 3374,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1499,
+      totalPrice: 2998,
+      daysInChina: 42,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-25",
+      returnDateLabel: "8月25日（周二）",
+      pricePerPerson: 1615,
+      totalPrice: 3230,
+      daysInChina: 47,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "07:25 CKG → 09:00 SEA（经停PEK）",
+      flightDuration: "13h 50m / 16h 35m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-25",
+      returnDateLabel: "8月25日（周二）",
+      pricePerPerson: 1809,
+      totalPrice: 3618,
+      daysInChina: 54,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "07:25 CKG → 09:00 SEA（经停PEK）",
+      flightDuration: "13h 50m / 16h 35m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1499,
+      totalPrice2Pax: 2998,
+      daysInChina: 42,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      warning: "⚠️ 在华仅42天，未达45天建议最短停留",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1615,
+      totalPrice2Pax: 3230,
+      daysInChina: 47,
+      cabinNote: "经济舱直飞去程，回程经停北京（PEK），含2件托运行李",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-25/2adults?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1687,
+      totalPrice2Pax: 3374,
+      daysInChina: 49,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-20/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "Alaska/Condor/中国东方",
+      airlineCode: "AS/DE/MU",
+      departDate: "7月6日（周一）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1599,
+      totalPrice2Pax: 3198,
+      daysInChina: 50,
+      cabinNote: "经济舱，经停PDX和FRA，约28–30小时",
+      warning: "⚠️ 非直飞，经停2次；达美航空不运营此航线",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA3LTA2agcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjVqBwgBEgNQVkdyBwgBEgNTRUFAAUgBcAGCAQsI____________AZABAg&hl=en&curr=USD&gl=us",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1809,
+      totalPrice2Pax: 3618,
+      daysInChina: 54,
+      cabinNote: "经济舱直飞去程，回程经停北京（PEK），含2件托运行李",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-25/2adults?sort=price_a&fs=airlines=HU",
+    },
+  ],
+};
+
+// 历史查询：2026年4月26日 08:03 PST
 const query_2026_04_26_0803: QueryResult = {
   id: "2026-04-26_08:03",
   queryDate: "2026-04-26",
   queryDateLabel: "2026年4月26日 08:03 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -2045,6 +2229,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_04_28_0804,
   query_2026_04_26_0803,
   query_2026_04_25_0802,
   query_2026_04_24_0801,
@@ -2057,4 +2242,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_04_26_0803;
+export const latestQueryResult = query_2026_04_28_0804;
