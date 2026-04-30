@@ -133,12 +133,196 @@ export const staticTips = [
 // 查询结果数据（与查询时间相关）
 // ============================================================
 
-// 最新查询：2026年4月29日 08:05 PST
+// 最新查询：2026年4月30日 08:02 PST
+const query_2026_04_30_0802: QueryResult = {
+  id: "2026-04-30_08:02",
+  queryDate: "2026-04-30",
+  queryDateLabel: "2026年4月30日 08:02 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 8月28日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Google Flights 日期矩阵）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 29", "Jul 1", "Jul 3", "Jul 4", "Jul 5",
+      "Jul 6", "Jul 7", "Jul 8", "Jul 10", "Jul 11",
+      "Jul 13", "Jul 14", "Jul 15",
+    ],
+    returnTimes: [
+      "Aug 24", "Aug 25", "Aug 26", "Aug 27", "Aug 28",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Google Flights 日期矩阵（全部航空公司），2026年4月30日查询，每人价格
+    // 最低价：$1,306/人（Jul 8/13/14/15 → Aug 28，51–50–47–46天），2人共 $2,612
+    // ⚠️ 注意：达美航空不运营 SEA→PVG 直飞航线，最低价为多家航空联营票
+    prices: [
+      // Jun 29: Aug24=$1,456✓(56d), Aug25=$1,456✓(57d), Aug26=$1,854✓(58d), Aug27=$1,456✓(59d), Aug28=null
+      [1456, 1456, 1854, 1456, null],
+      // Jul 1: Aug24=$1,456✓(54d), Aug25=$1,456✓(55d), Aug26=$1,799✓(56d), Aug27=$1,456✓(57d), Aug28=null
+      [1456, 1456, 1799, 1456, null],
+      // Jul 3: Aug24=$1,506✓(52d), Aug25=$1,506✓(53d), Aug26=$1,859✓(54d), Aug27=$1,506✓(55d), Aug28=$1,356✓(56d)
+      [1506, 1506, 1859, 1506, 1356],
+      // Jul 4: Aug24=$1,506✓(51d), Aug25=$1,506✓(52d), Aug26=$1,853✓(53d), Aug27=$1,506✓(54d), Aug28=$1,356✓(55d)
+      [1506, 1506, 1853, 1506, 1356],
+      // Jul 5: Aug24=$1,777✓(50d), Aug25=$1,777✓(51d), Aug26=$1,723✓(52d), Aug27=$1,777✓(53d), Aug28=$1,838✓(54d)
+      [1777, 1777, 1723, 1777, 1838],
+      // Jul 6: Aug24=$1,599✓(49d), Aug25=$1,599✓(50d), Aug26=$1,703✓(51d), Aug27=$1,599✓(52d), Aug28=$1,506✓(53d)
+      [1599, 1599, 1703, 1599, 1506],
+      // Jul 7: Aug24=$1,599✓(48d), Aug25=$1,599✓(49d), Aug26=$1,673✓(50d), Aug27=$1,599✓(51d), Aug28=$1,506✓(52d)
+      [1599, 1599, 1673, 1599, 1506],
+      // Jul 8: Aug24=$1,456✓(47d), Aug25=$1,456✓(48d), Aug26=$1,673✓(49d), Aug27=$1,456✓(50d), Aug28=$1,306✓(51d)
+      [1456, 1456, 1673, 1456, 1306],
+      // Jul 10: Aug24=$1,646✓(45d), Aug25=$1,646✓(46d), Aug26=$1,723✓(47d), Aug27=$1,646✓(48d), Aug28=$1,556✓(49d)
+      [1646, 1646, 1723, 1646, 1556],
+      // Jul 11: Aug24=$1,506✓(44d✗→skip), Aug25=$1,506✓(45d), Aug26=$1,723✓(46d), Aug27=$1,506✓(47d), Aug28=$1,356✓(48d)
+      [null, 1506, 1723, 1506, 1356],
+      // Jul 13: Aug24=null(42d✗), Aug25=$1,456✓(43d✗→skip), Aug26=$1,618✓(44d✗→skip), Aug27=$1,456✓(45d), Aug28=$1,306✓(46d)
+      [null, null, null, 1456, 1306],
+      // Jul 14: Aug24=null(41d✗), Aug25=null(42d✗), Aug26=$1,618✓(43d✗→skip), Aug27=$1,456✓(44d✗→skip), Aug28=$1,306✓(45d)
+      [null, null, null, null, 1306],
+      // Jul 15: Aug24=null(40d✗), Aug25=null(41d✗), Aug26=$1,673✓(42d✗→skip), Aug27=$1,456✓(43d✗→skip), Aug28=$1,306✓(44d✗→skip)
+      [null, null, null, null, null],
+    ],
+    note: "价格来源：Google Flights 日期矩阵（全部航空公司），2026年4月30日查询，每人价格。最低价 $1,306/人（Jul 8/13/14 → Aug 28，51–46天），2人共 $2,612。⚠️ 注意：达美航空不运营 SEA→PVG 直飞航线，最低价为多家航空联营票（请查看 Google Flights 确认具体航班详情）。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1424,
+      totalPrice: 2847,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1499,
+      totalPrice: 2998,
+      daysInChina: 42,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1617,
+      totalPrice: 3233,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1766,
+      totalPrice: 3531,
+      daysInChina: 63,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空公司",
+      airlineCode: "--",
+      departDate: "7月8日（周三）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1306,
+      totalPrice2Pax: 2612,
+      daysInChina: 51,
+      cabinNote: "经济舱，最低价为多家航空联营票（请查看 Google Flights 确认具体航班）",
+      warning: "⚠️ 达美航空不运营 SEA→PVG 直飞航线，请查看 Google Flights 确认具体航班",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA3LTA4agcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjhqBwgBEgNQVkdyBwgBEgNTRUFAAUgBcAGCAQsI____________AZABAg&hl=en&curr=USD&gl=us",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1424,
+      totalPrice2Pax: 2847,
+      daysInChina: 49,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-27/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空公司",
+      airlineCode: "--",
+      departDate: "7月3日或4日",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1356,
+      totalPrice2Pax: 2712,
+      daysInChina: 56,
+      cabinNote: "经济舱，最低价为多家航空联营票（请查看 Google Flights 确认具体航班）",
+      warning: "⚠️ 达美航空不运营 SEA→PVG 直飞航线，请查看 Google Flights 确认具体航班",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA3LTAzagcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjhqBwgBEgNQVkdyBwgBEgNTRUFAAUgBcAGCAQsI____________AZABAg&hl=en&curr=USD&gl=us",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空公司",
+      airlineCode: "--",
+      departDate: "6月29日（周一）",
+      returnDate: "8月24日或25日或27日",
+      pricePerPerson: 1456,
+      totalPrice2Pax: 2912,
+      daysInChina: 56,
+      cabinNote: "经济舱，最低价为多家航空联营票（请查看 Google Flights 确认具体航班）",
+      warning: "⚠️ 达美航空不运营 SEA→PVG 直飞航线，请查看 Google Flights 确认具体航班",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA2LTI5agcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjRqBwgBEgNQVkdyBwgBEgNTRUFAAUgBcAGCAQsI____________AZABAg&hl=en&curr=USD&gl=us",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1617,
+      totalPrice2Pax: 3233,
+      daysInChina: 56,
+      cabinNote: "经济舱直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-27/2adults?sort=price_a&fs=stops=0;airlines=HU",
+    },
+  ],
+};
+
+// 历史查询：2026年4月29日 08:05 PST
 const query_2026_04_29_0805: QueryResult = {
   id: "2026-04-29_08:05",
   queryDate: "2026-04-29",
   queryDateLabel: "2026年4月29日 08:05 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月23日",
@@ -2421,6 +2605,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_04_30_0802,
   query_2026_04_29_0805,
   query_2026_04_28_0804,
   query_2026_04_26_0803,
@@ -2435,4 +2620,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_04_29_0805;
+export const latestQueryResult = query_2026_04_30_0802;
