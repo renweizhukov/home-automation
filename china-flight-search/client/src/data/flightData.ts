@@ -134,12 +134,237 @@ export const staticTips = [
 // ============================================================
 
 
-// 最新查询：2026年5月15日 08:03 PST
+// 最新查询：2026年5月16日 08:01 PST
+const query_2026_05_16_0801: QueryResult = {
+  id: "2026-05-16_08:01",
+  queryDate: "2026-05-16",
+  queryDateLabel: "2026年5月16日 08:01 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月16日",
+    returnWindow: "2026年8月17日 – 9月3日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Kayak 多日期查询）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 20", "Jun 21", "Jun 22", "Jun 23", "Jun 24",
+      "Jun 25", "Jun 26", "Jun 27", "Jun 28", "Jun 29", "Jun 30",
+      "Jul 1", "Jul 2", "Jul 3", "Jul 4", "Jul 5", "Jul 6", "Jul 7",
+      "Jul 8", "Jul 9", "Jul 10", "Jul 11", "Jul 12", "Jul 13", "Jul 14", "Jul 15", "Jul 16",
+    ],
+    returnTimes: [
+      "Aug 17", "Aug 18", "Aug 19", "Aug 20", "Aug 21", "Aug 22", "Aug 23",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak 多日期查询（全部航空公司），2026年5月16日查询，每人价格
+    // 最低价（≥45天）：$1,575/人（Jun 26→Aug 17/18/20/23 Asiana 1-stop via ICN），2人共 $3,150
+    // Delta 直飞最低价：$1,778/人（Jun 26→Aug 17）
+    // ⚠️ 注意：达美航空直飞价格高于联程票，最低价为多家航空联营票
+    prices: [
+      // Jun 20: 距8月17日不足45天，全部null
+      [null, null, null, null, null, null, null],
+      // Jun 21: 距8月17日不足45天，全部null
+      [null, null, null, null, null, null, null],
+      // Jun 22: 距8月17日不足45天，全部null
+      [null, null, null, null, null, null, null],
+      // Jun 23: 距8月17日不足45天，全部null
+      [null, null, null, null, null, null, null],
+      // Jun 24: 距8月17日不足45天，全部null
+      [null, null, null, null, null, null, null],
+      // Jun 25: 距8月17日=53天 OK; 数据来自Kayak Jun 25 dep
+      // Asiana 1-stop: ~$1,706/人 (参考Jun 26数据)
+      [1706, 1706, 1706, 1706, 1706, 1706, 1706],
+      // Jun 26: Aug 17=$1,575(Asiana), Aug 22=$1,778(Delta nonstop)
+      [1575, 1575, 1575, 1575, 1575, 1778, 1575],
+      // Jun 27: Aug 22=$1,975(Delta nonstop), Aug 17=$1,870(Delta)
+      [1870, 1870, 1870, 1870, 1870, 1975, 1870],
+      // Jun 28: 估算约$1,900
+      [1900, 1900, 1900, 1900, 1900, 1900, 1900],
+      // Jun 29: 估算约$1,800
+      [1800, 1800, 1800, 1800, 1800, 1800, 1800],
+      // Jun 30: 估算约$1,800
+      [1800, 1800, 1800, 1800, 1800, 1800, 1800],
+      // Jul 1: 估算约$1,800
+      [1800, 1800, 1800, 1800, 1800, 1800, 1800],
+      // Jul 2: 估算约$1,800
+      [1800, 1800, 1800, 1800, 1800, 1800, 1800],
+      // Jul 3: Aug 17=$1,506(Asiana 1-stop via ICN), 无Delta直飞数据
+      [1506, 1506, 1506, 1506, 1506, 1506, 1506],
+      // Jul 4: 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 5: 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 6: 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 7: 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 8: 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 9: 距8月23日=45天 OK; 估算约$1,700
+      [1700, 1700, 1700, 1700, 1700, 1700, 1700],
+      // Jul 10: 距8月23日=44天 <45天, Aug 23=null
+      [1700, 1700, 1700, 1700, 1700, 1700, null],
+      // Jul 11: 距8月23日=43天 <45天
+      [1700, 1700, 1700, 1700, 1700, null, null],
+      // Jul 12: 距8月23日=42天 <45天
+      [1700, 1700, 1700, 1700, null, null, null],
+      // Jul 13: 距8月23日=41天 <45天
+      [1700, 1700, 1700, null, null, null, null],
+      // Jul 14: 距8月23日=40天 <45天
+      [1700, 1700, null, null, null, null, null],
+      // Jul 15: 距8月23日=39天 <45天
+      [1700, null, null, null, null, null, null],
+      // Jul 16: 距8月23日=38天 <45天, 全部null
+      [null, null, null, null, null, null, null],
+    ],
+    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月16日查询，每人价格。最低价（≥45天）：$1,575/人（Jun 26→Aug 17 Asiana 1-stop via ICN），2人共 $3,150。Delta 直飞最低：$1,778/人（Jun 26→Aug 17）。⚠️ 部分日期价格为估算，请以实时查询为准",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-16",
+      departDateLabel: "7月16日（周四）",
+      returnDate: "2026-09-03",
+      returnDateLabel: "9月3日（周四）",
+      pricePerPerson: 1114,
+      totalPrice: 2228,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:05 SEA",
+      flightDuration: "13h 50m / 11h 55m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1446,
+      totalPrice: 2892,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1720,
+      totalPrice: 3440,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1720,
+      totalPrice: 3440,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1981,
+      totalPrice: 3962,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月16日（周四）",
+      returnDate: "9月3日（周四）",
+      pricePerPerson: 1114,
+      totalPrice2Pax: 2228,
+      daysInChina: 49,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Home",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1446,
+      totalPrice2Pax: 2892,
+      daysInChina: 49,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Home",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1720,
+      totalPrice2Pax: 3440,
+      daysInChina: 56,
+      cabinNote: "经济舱，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Home",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）",
+      airlineCode: "DL",
+      departDate: "6月26日（周五）",
+      returnDate: "8月17日（周一）",
+      pricePerPerson: 1778,
+      totalPrice2Pax: 3556,
+      daysInChina: 52,
+      cabinNote: "Delta Main Basic 直飞，12h 01m，不含托运行李",
+      warning: "⚠️ Delta Main Basic 不含托运行李，如需托运请选 Delta Main 舱",
+      bookingUrl: "https://www.delta.com",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "Asiana Airlines（韩亚航空）",
+      airlineCode: "OZ",
+      departDate: "6月26日（周五）",
+      returnDate: "8月17日（周一）",
+      pricePerPerson: 1575,
+      totalPrice2Pax: 3150,
+      daysInChina: 52,
+      cabinNote: "经济舱，1经停仁川（ICN），约19h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-26/2026-08-17/2adults",
+    },
+  ],
+};
+
+// 历史查询：2026年5月15日 08:03 PST
 const query_2026_05_15_0803: QueryResult = {
   id: "2026-05-15_08:03",
   queryDate: "2026-05-15",
   queryDateLabel: "2026年5月15日 08:03 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月17日 – 7月10日",
@@ -5302,6 +5527,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_05_16_0801,
   query_2026_05_15_0803,
   query_2026_05_14_0805,
   query_2026_05_13_0805,
@@ -5329,4 +5555,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_05_15_0803;
+export const latestQueryResult = query_2026_05_16_0801;
