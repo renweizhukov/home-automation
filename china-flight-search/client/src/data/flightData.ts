@@ -157,20 +157,20 @@ const query_2026_05_18_0800: QueryResult = {
     ],
     // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
     // 数据来源：Kayak 多日期查询（全部航空公司），2026年5月18日查询，每人价格
-    // 最低价（≥45天）：$1,332/人（Jul 7→Aug 25, Cathay Pacific 1经停香港），2人共 $2,664
-    // Delta 直飞最低价：$1,668/人（Jul 7→Aug 25，Delta Main Basic）
-    // ⚠️ 注意：Jul 12→Aug 28 无 Delta 直飞数据，最低价为 American Airlines 1经停
+    // 最低价（≥45天）：$1,214/人（Jul 12→Aug 28，ANA 2经停），2人共 $2,428
+    // Delta 直飞最低价：$1,619/人（Jul 12→Aug 28，Delta Main Basic）
+    // 性价比最佳（1经停）：$1,332/人（Jul 7→Aug 25，Cathay Pacific 1经停香港）
     prices: [
       // Jun 23: Aug 23=$1,530(Asiana 1-stop), Aug 25=null(不足45天), Aug 28=null(不足45天)
       [1530, null, null],
       // Jun 30: Aug 23=$1,462(Cathay Pacific 1-stop), Aug 25=null(不足45天), Aug 28=null(不足45天)
       [1462, null, null],
-      // Jul 7: Aug 23=null(不足45天), Aug 25=$1,332(Cathay Pacific 1-stop), Aug 28=$1,433(AA 1-stop)
-      [null, 1332, 1433],
-      // Jul 12: Aug 23=null(不足45天), Aug 25=null(不足45天), Aug 28=$1,433(AA 1-stop)
-      [null, null, 1433],
+      // Jul 7: Aug 23=null(不足45天), Aug 25=$1,332(Cathay Pacific 1-stop), Aug 28=$1,218(Alaska+Asiana 1-stop)
+      [null, 1332, 1218],
+      // Jul 12: Aug 23=null(不足45天), Aug 25=null(不足45天), Aug 28=$1,214(ANA 2-stop)
+      [null, null, 1214],
     ],
-    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月18日查询，每人价格。最低价（≥45天）：$1,332/人（Jul 7→Aug 25，Cathay Pacific 1经停香港），2人共 $2,664。Delta 直飞最低：$1,668/人（Jul 7→Aug 25，Delta Main Basic）。⚠️ 部分格子因不足45天间隔标为null，请以实时查询为准",
+    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月18日查询，每人价格。最低价（≥45天）：$1,214/人（Jul 12→Aug 28，ANA 2经停），2人共 $2,428。Delta 直飞最低：$1,619/人（Jul 12→Aug 28，Delta Main Basic）。⚠️ 部分格子因不足45天间隔标为null，请以实时查询为准",
   },
   chongqingResults: [
     {
@@ -226,8 +226,8 @@ const query_2026_05_18_0800: QueryResult = {
       departDateLabel: "6月25日（周四）",
       returnDate: "2026-08-27",
       returnDateLabel: "8月27日（周四）",
-      pricePerPerson: 1964,
-      totalPrice: 3928,
+      pricePerPerson: 1909,
+      totalPrice: 3818,
       daysInChina: 63,
       departTime: "11:05 SEA → 次日 16:30 CKG",
       returnTime: "12:10 CKG → 09:40 SEA",
@@ -251,6 +251,21 @@ const query_2026_05_18_0800: QueryResult = {
       rank: 1,
       medal: "🥇",
       route: "SEA → 上海（PVG）",
+      airline: "ANA（全日空）",
+      airlineCode: "NH",
+      departDate: "7月12日（周日）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1214,
+      totalPrice2Pax: 2428,
+      daysInChina: 47,
+      cabinNote: "经济舱，2经停（NRT+HND），约24h，最低价",
+      warning: "⚠️ 2经停，总行程约24h，适合价格优先的旅客",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-12/2026-08-28/2adults",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
       airline: "国泰航空（Cathay Pacific）",
       airlineCode: "CX",
       departDate: "7月7日（周二）",
@@ -258,12 +273,12 @@ const query_2026_05_18_0800: QueryResult = {
       pricePerPerson: 1332,
       totalPrice2Pax: 2664,
       daysInChina: 49,
-      cabinNote: "经济舱，1经停香港（HKG），约18h 45m",
+      cabinNote: "经济舱，1经停香港（HKG），约18h 45m，性价比最佳",
       bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-07/2026-08-25/2adults",
     },
     {
-      rank: 2,
-      medal: "🥈",
+      rank: 3,
+      medal: "🥉",
       route: "SEA → 重庆（CKG）",
       airline: "海南航空",
       airlineCode: "HU",
@@ -274,20 +289,6 @@ const query_2026_05_18_0800: QueryResult = {
       daysInChina: 49,
       cabinNote: "经济舱，直飞，含2件托运行李（每件23kg）",
       bookingUrl: "https://www.hainanairlines.com/US/CN/Home",
-    },
-    {
-      rank: 3,
-      medal: "🥉",
-      route: "SEA → 上海（PVG）",
-      airline: "国泰航空（Cathay Pacific）",
-      airlineCode: "CX",
-      departDate: "6月30日（周二）",
-      returnDate: "8月23日（周日）",
-      pricePerPerson: 1462,
-      totalPrice2Pax: 2924,
-      daysInChina: 54,
-      cabinNote: "经济舱，1经停香港（HKG），约26h",
-      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-23/2adults",
     },
     {
       rank: 4,
@@ -309,11 +310,11 @@ const query_2026_05_18_0800: QueryResult = {
       route: "SEA → 上海（PVG）",
       airline: "达美航空（Delta）",
       airlineCode: "DL",
-      departDate: "7月7日（周二）",
-      returnDate: "8月25日（周二）",
-      pricePerPerson: 1668,
-      totalPrice2Pax: 3336,
-      daysInChina: 49,
+      departDate: "7月12日（周日）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1619,
+      totalPrice2Pax: 3238,
+      daysInChina: 47,
       cabinNote: "Delta Main Basic 直飞，12h 30m，不含托运行李",
       warning: "⚠️ Delta Main Basic 不含托运行李，如需托运请选 Delta Main 舱",
       bookingUrl: "https://www.delta.com",
