@@ -134,12 +134,184 @@ export const staticTips = [
 // ============================================================
 
 
-// 最新查询：2026年5月23日 08:03 PST
+// 最新查询：2026年5月24日 08:03 PST
+const query_2026_05_24_0803: QueryResult = {
+  id: "2026-05-24_08:03",
+  queryDate: "2026-05-24",
+  queryDateLabel: "2026年5月24日 08:03 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Kayak 多日期查询）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 23", "Jun 30", "Jul 7",
+    ],
+    returnTimes: [
+      "Aug 23", "Aug 25", "Aug 28",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak 多日期查询（全部航空公司），2026年5月24日查询，每人价格
+    // 最低价（≥45天）：$1,209/人（Jul 7→Aug 25，Air Canada 1经停温哥华），2人共 $2,418
+    // Delta 直飞最低价：$1,548/人（Jul 12→Aug 28，Delta nonstop）
+    // 性价比最佳（1经停）：$1,209/人（Jul 7→Aug 25，Air Canada 1经停温哥华）
+    prices: [
+      // Jun 23: Aug 23=$1,402(Air Canada+Korean Air 2-stop YVR+ICN, 61天), Aug 25=$1,216(Air Canada+Korean Air 2-stop YVR+ICN, 63天), Aug 28=$1,421(ANA 1-stop HND 23h35m layover, 66天)
+      [1402, 1216, 1421],
+      // Jun 30: Aug 23=$1,335(Air Canada 1-stop YVR, 54天), Aug 25=$1,234(Air Canada+Air China 2-stop YVR+NRT, 56天), Aug 28=$1,340(Air Canada+Air China 2-stop YVR+NRT, 59天)
+      [1335, 1234, 1340],
+      // Jul 7: Aug 23=$1,235(Air Canada+Asiana 2-stop YVR+ICN, 47天), Aug 25=$1,209(Air Canada 1-stop YVR, 49天), Aug 28=$1,556(Korean Air 1-stop ICN, 52天)
+      [1235, 1209, 1556],
+    ],
+    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月24日查询，每人价格。最低价（≥45天）：$1,209/人（Jul 7→Aug 25，Air Canada 1经停温哥华），2人共 $2,418。Delta 直飞最低：$1,665/人（Jun 30→Aug 23，Delta nonstop）。⚠️ Jul 7→Aug 28 仅39班可选，无直飞；Jun 23→Aug 28 仅62班可选，最低价含超长中转（ANA HND 23h35m）",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1434,
+      totalPrice: 2868,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1624,
+      totalPrice: 3248,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1814,
+      totalPrice: 3628,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1915,
+      totalPrice: 3830,
+      daysInChina: 63,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 2059,
+      totalPrice: 4118,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "加拿大航空（Air Canada）",
+      airlineCode: "AC",
+      departDate: "7月7日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1209,
+      totalPrice2Pax: 2418,
+      daysInChina: 49,
+      cabinNote: "经济舱，1经停温哥华（YVR），约20h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-07/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
+      airline: "加拿大航空（Air Canada）",
+      airlineCode: "AC",
+      departDate: "6月23日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1216,
+      totalPrice2Pax: 2432,
+      daysInChina: 63,
+      cabinNote: "经济舱，2经停温哥华+首尔（YVR+ICN），约22h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-23/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "加拿大航空（Air Canada）",
+      airlineCode: "AC",
+      departDate: "6月30日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1234,
+      totalPrice2Pax: 2468,
+      daysInChina: 56,
+      cabinNote: "经济舱，2经停温哥华+东京（YVR+NRT），约22h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "加拿大航空（Air Canada）",
+      airlineCode: "AC",
+      departDate: "6月30日（周二）",
+      returnDate: "8月23日（周日）",
+      pricePerPerson: 1335,
+      totalPrice2Pax: 2670,
+      daysInChina: 54,
+      cabinNote: "经济舱，1经停温哥华（YVR），约20h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-23/2adults?sort=price_a",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1434,
+      totalPrice2Pax: 2868,
+      daysInChina: 49,
+      cabinNote: "经济舱，直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-27/2adults?sort=price_a",
+    },
+  ],
+};
+
+// 历史查询：2026年5月23日 08:03 PST
 const query_2026_05_23_0803: QueryResult = {
   id: "2026-05-23_08:03",
   queryDate: "2026-05-23",
   queryDateLabel: "2026年5月23日 08:03 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -6778,6 +6950,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_05_24_0803,
   query_2026_05_23_0803,
   query_2026_05_22_0805,
   query_2026_05_21_0800,
@@ -6813,4 +6986,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_05_23_0803;
+export const latestQueryResult = query_2026_05_24_0803;
