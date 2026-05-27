@@ -134,12 +134,174 @@ export const staticTips = [
 // ============================================================
 
 
-// 最新查询：2026年5月26日 08:05 PST
+// 最新查询：2026年5月27日 08:04 PST
+const query_2026_05_27_0804: QueryResult = {
+  id: "2026-05-27_08:04",
+  queryDate: "2026-05-27",
+  queryDateLabel: "2026年5月27日 08:04 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Kayak 多日期查询）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 23", "Jun 30", "Jul 7",
+    ],
+    returnTimes: [
+      "Aug 23", "Aug 25", "Aug 28",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak 多日期查询（全部航空公司），2026年5月27日查询，每人价格
+    // 最低价（≥45天）：$1,345/人（Jun 30→Aug 28，ANA 1经停HND 23h35m超长中转），2人共 $2,690
+    // 1经停合理中转最低价：$1,500/人（Jun 30→Aug 25，Cathay Pacific 1经停HKG 2h35m），2人共 $3,000
+    // Delta 直飞最低价：$1,657/人（Jul 7→Aug 28，Delta nonstop）
+    prices: [
+      // Jun 23: Aug 23=$1,590(China Airlines 1-stop TPE, 61天), Aug 25=$1,599(Asiana 1-stop ICN, 63天), Aug 28=$1,401(ANA 1-stop HND 23h35m layover, 66天)
+      [1590, 1599, 1401],
+      // Jun 30: Aug 23=$1,548(ANA 1-stop HND 3h30m, 54天), Aug 25=$1,500(Cathay Pacific 1-stop HKG 2h35m, 56天), Aug 28=$1,345(ANA 1-stop HND 23h35m layover, 59天)
+      [1548, 1500, 1345],
+      // Jul 7: Aug 23=$1,263(United+ANA 2-stop LAX+HND, 47天), Aug 25=$1,554(United+ANA 2-stop, 49天), Aug 28=$1,401(ANA 1-stop HND 23h35m layover, 52天)
+      [1263, 1554, 1401],
+    ],
+    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月27日查询，每人价格。最低价（≥45天）：$1,345/人（Jun 30→Aug 28，ANA 1经停HND），2人共 $2,690。⚠️ Jun 30→Aug 28 和 Jun 23→Aug 28 最低价含超长中转（ANA HND 23h35m），建议选 $1,500/人的国泰航空1经停香港（Jun 30→Aug 25）。Delta 直飞最低：$1,657/人（Jul 7→Aug 28）。Jul 7→Aug 23 最低价为2经停（United+ANA，LAX+HND）",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1434,
+      totalPrice: 2868,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1664,
+      totalPrice: 3328,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-16",
+      departDateLabel: "7月16日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1264,
+      totalPrice: 2528,
+      daysInChina: 42,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1941,
+      totalPrice: 3882,
+      daysInChina: 63,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "全日空（ANA）",
+      airlineCode: "NH",
+      departDate: "6月30日（周二）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1345,
+      totalPrice2Pax: 2690,
+      daysInChina: 59,
+      cabinNote: "经济舱，1经停东京羽田（HND），约19h07m，中转3h30m",
+      warning: "⚠️ 最低价含超长中转（ANA HND 23h35m），建议确认可接受后再订",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-28/2adults?sort=price_a",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
+      airline: "国泰航空（Cathay Pacific）",
+      airlineCode: "CX",
+      departDate: "6月30日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1500,
+      totalPrice2Pax: 3000,
+      daysInChina: 56,
+      cabinNote: "经济舱，1经停香港（HKG），约18h45m，中转2h35m",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "全日空（ANA）",
+      airlineCode: "NH",
+      departDate: "6月30日（周二）",
+      returnDate: "8月23日（周日）",
+      pricePerPerson: 1548,
+      totalPrice2Pax: 3096,
+      daysInChina: 54,
+      cabinNote: "经济舱，1经停东京羽田（HND），约17h15m，中转3h30m",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-23/2adults?sort=price_a",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1434,
+      totalPrice2Pax: 2868,
+      daysInChina: 49,
+      cabinNote: "经济舱，直飞，含2件托运行李（每件23kg）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-27/2adults?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "全日空（ANA）",
+      airlineCode: "NH",
+      departDate: "7月7日（周二）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1401,
+      totalPrice2Pax: 2802,
+      daysInChina: 52,
+      cabinNote: "经济舱，1经停东京羽田（HND），约29h05m，中转23h35m",
+      warning: "⚠️ 含超长中转（HND 23h35m），适合愿意在东京停留的旅客",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-07/2026-08-28/2adults?sort=price_a",
+    },
+  ],
+};
+
+// 历史查询：2026年5月26日 08:05 PST
 const query_2026_05_26_0805: QueryResult = {
   id: "2026-05-26_08:05",
   queryDate: "2026-05-26",
   queryDateLabel: "2026年5月26日 08:05 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -7258,6 +7420,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_05_27_0804,
   query_2026_05_26_0805,
   query_2026_05_25_0801,
   query_2026_05_24_0803,
@@ -7296,4 +7459,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_05_26_0805;
+export const latestQueryResult = query_2026_05_27_0804;
