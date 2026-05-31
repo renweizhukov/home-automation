@@ -134,12 +134,174 @@ export const staticTips = [
 // ============================================================
 
 
-// 最新查询：2026年5月30日 08:15 PST
+// 最新查询：2026年5月31日 08:04 PST
+const query_2026_05_31_0804: QueryResult = {
+  id: "2026-05-31_08:04",
+  queryDate: "2026-05-31",
+  queryDateLabel: "2026年5月31日 08:04 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月23日 – 7月9日",
+    returnWindow: "2026年8月20日 – 8月28日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Kayak 多日期查询）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 23", "Jun 30", "Jul 7",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 25", "Aug 28",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak 多日期查询（全部航空公司），2026年5月31日查询，每人价格
+    // 最低价（≥45天）：$1,339/人（Jun 30→Aug 28，ANA 2经停YVR+HND，23h），2人共 $2,678
+    // 1经停合理中转最低价：$1,352/人（Jul 7→Aug 25，Cathay Pacific 1经停HKG 2h35m，17h15m），2人共 $2,704
+    // Delta 直飞最低价：$1,615/人（Jun 30→Aug 25）
+    prices: [
+      // Jun 23: Aug 20=null(58天，但无合适数据), Aug 25=$1,470(Cathay Pacific 2-stop YVR+HKG, 63天), Aug 28=$1,387(Alaska+American 1-stop DFW 5h48m, 66天)
+      [null, 1470, 1387],
+      // Jun 30: Aug 20=$1,448(Philippine Airlines 1-stop MNL 6h50m, 51天), Aug 25=$1,328(Philippine Airlines 1-stop MNL, 56天), Aug 28=$1,339(ANA 2-stop YVR+HND, 59天)
+      [1448, 1328, 1339],
+      // Jul 7: Aug 20=null(44天，不满足45天间隔), Aug 25=$1,352(Cathay Pacific 1-stop HKG 2h35m, 49天), Aug 28=$1,401(American Airlines 1-stop DFW 11h31m, 52天)
+      [null, 1352, 1401],
+    ],
+    note: "价格来源：Kayak 多日期查询（全部航空公司），2026年5月31日查询，每人价格。最低价（≥45天）：$1,328/人（Jun 30→Aug 25，菲律宾航空1经停马尼拉MNL 6h50m，24h20m），2人共 $2,656。1经停合理中转最低：$1,352/人（Jul 7→Aug 25，国泰航空1经停香港HKG 2h35m，约17h15m），2人共 $2,704。Delta 直飞最低：$1,615/人（Jun 30→Aug 25）。⚠️ Jun 23→Aug 28 最低价为Alaska+美国航空经达拉斯DFW（5h48m），非典型中国航线；Jun 30→Aug 25 最低价菲律宾航空返程含超长中转（MNL 15h25m+LAX 3h15m），建议选 $1,436/人的菲律宾航空直接1经停马尼拉选项",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-28",
+      returnDateLabel: "8月28日（周五）",
+      pricePerPerson: 1764,
+      totalPrice: 3528,
+      daysInChina: 50,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-25",
+      returnDateLabel: "8月25日（周二）",
+      pricePerPerson: 1719,
+      totalPrice: 3438,
+      daysInChina: 47,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-28",
+      returnDateLabel: "8月28日（周五）",
+      pricePerPerson: 1964,
+      totalPrice: 3928,
+      daysInChina: 57,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-28",
+      returnDateLabel: "8月28日（周五）",
+      pricePerPerson: 2224,
+      totalPrice: 4448,
+      daysInChina: 64,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "菲律宾航空（Philippine Airlines）",
+      airlineCode: "PR",
+      departDate: "6月30日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1328,
+      totalPrice2Pax: 2656,
+      daysInChina: 56,
+      cabinNote: "经济舱，1经停马尼拉（MNL 6h50m），约24h20m",
+      warning: "⚠️ 注意：最低价含超长返程（MNL 15h25m+LAX 3h15m），建议选 $1,436/人的直接1经停选项",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
+      airline: "全日空（ANA）",
+      airlineCode: "NH",
+      departDate: "6月30日（周二）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1339,
+      totalPrice2Pax: 2678,
+      daysInChina: 59,
+      cabinNote: "经济舱，2经停温哥华+东京羽田（YVR+HND），约23h",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-30/2026-08-28/2adults?sort=price_a",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "国泰航空（Cathay Pacific）",
+      airlineCode: "CX",
+      departDate: "7月7日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1352,
+      totalPrice2Pax: 2704,
+      daysInChina: 49,
+      cabinNote: "经济舱，1经停香港（HKG 2h35m），约17h15m",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-07/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "国泰航空（Cathay Pacific）",
+      airlineCode: "CX",
+      departDate: "6月23日（周二）",
+      returnDate: "8月25日（周二）",
+      pricePerPerson: 1470,
+      totalPrice2Pax: 2940,
+      daysInChina: 63,
+      cabinNote: "经济舱，2经停温哥华+香港（YVR+HKG），约24h09m",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-06-23/2026-08-25/2adults?sort=price_a",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "国泰航空（Cathay Pacific）",
+      airlineCode: "CX",
+      departDate: "7月7日（周二）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1401,
+      totalPrice2Pax: 2802,
+      daysInChina: 52,
+      cabinNote: "经济舱，1经停达拉斯（DFW 11h31m），约30h40m",
+      warning: "⚠️ 含超长中转（DFW 11h31m），适合愿意在美国中转的旅客",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-07/2026-08-28/2adults?sort=price_a",
+    },
+  ],
+};
+
+// 历史查询：2026年5月30日 08:15 PST
 const query_2026_05_30_0815: QueryResult = {
   id: "2026-05-30_08:15",
   queryDate: "2026-05-30",
   queryDateLabel: "2026年5月30日 08:15 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月23日 – 7月7日",
@@ -7740,6 +7902,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_05_31_0804,
   query_2026_05_30_0815,
   query_2026_05_28_0813,
   query_2026_05_27_0804,
@@ -7781,4 +7944,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_05_30_0815;
+export const latestQueryResult = query_2026_05_31_0804;
