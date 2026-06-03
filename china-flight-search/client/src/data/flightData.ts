@@ -132,14 +132,198 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
+// 最新查询：2026年6月3日 08:34 PST
+const query_2026_06_03_0834: QueryResult = {
+  id: "2026-06-03 08:34",
+  queryDate: "2026-06-03",
+  queryDateLabel: "2026年6月3日 08:34 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "全部航空公司（Google Flights 多日期查询）",
+    flightNumber: "多家航空",
+    departureTimes: [
+      "Jun 20", "Jun 25", "Jun 28", "Jul 1", "Jul 7", "Jul 13", "Jul 15",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 23", "Aug 26", "Aug 28", "Aug 30", "Aug 31", "Sep 1",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Google Flights 多日期查询（全部航空公司），2026年6月3日查询，2人总价
+    // 最低价（≥45天）：$2,655（Jun 29/30→Sep 1，63-64天），2人共 $2,655
+    // 次低价：$2,661（Jul 13/14/15→Aug 29，45-47天），2人共 $2,661
+    // 海南航空直飞最低：$2,878（Jul 9→Aug 27，49天）
+    prices: [
+      // Jun 20: Aug 20=null(<45天), Aug 23=$3,447, Aug 26=$3,333, Aug 28=$3,403, Aug 30=null, Aug 31=null, Sep 1=null
+      [null, 3447, 3333, 3403, null, null, null],
+      // Jun 25: Aug 20=null(<45天), Aug 23=$3,333, Aug 26=$3,219, Aug 28=$3,289, Aug 30=$3,273, Aug 31=$2,982, Sep 1=$2,980
+      [null, 3333, 3219, 3289, 3273, 2982, 2980],
+      // Jun 28: Aug 20=null(<45天), Aug 23=$3,123, Aug 26=$2,923, Aug 28=$3,082, Aug 30=$2,923, Aug 31=$2,764, Sep 1=$2,762
+      [null, 3123, 2923, 3082, 2923, 2764, 2762],
+      // Jul 1: Aug 20=null(<45天), Aug 23=$3,123, Aug 26=$2,923, Aug 28=$2,977, Aug 30=null, Aug 31=null, Sep 1=null
+      [null, 3123, 2923, 2977, null, null, null],
+      // Jul 7: Aug 20=null(<45天), Aug 23=$3,124, Aug 26=$3,188, Aug 28=$2,977, Aug 30=null, Aug 31=null, Sep 1=null
+      [null, 3124, 3188, 2977, null, null, null],
+      // Jul 13: Aug 20=null(<45天), Aug 23=null(<45天), Aug 26=null(44天<45天), Aug 28=$2,739, Aug 30=null, Aug 31=null, Sep 1=null
+      [null, null, null, 2739, null, null, null],
+      // Jul 15: Aug 20=null(<45天), Aug 23=null(<45天), Aug 26=null(<45天), Aug 28=null(<45天), Aug 30=null, Aug 31=null, Sep 1=null
+      [null, null, null, null, null, null, null],
+    ],
+    note: "价格来源：Google Flights 多日期查询（全部航空公司），2026年6月3日查询，2人总价（1成人+1儿童10岁）。最低价（≥45天）：$2,655（Jun 29/30→Sep 1，63-64天），2人共 $2,655。次低价：$2,661（Jul 13/14/15→Aug 29，45-47天）；$2,739（Jul 13/14→Aug 28，45-46天）；$2,748（Jul 13→Aug 27，45天）。注意：Jul 13-15→Aug 26 最低价 $2,573 因不足45天间隔（44天以下）不计入推荐。Jun 28→Sep 1 $2,762（65天）。Delta 直飞最低：$2,762（Jun 28→Sep 1）。⚠️ 最低价可能为多经停航班，建议在 Google Flights 上确认具体航班信息",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1439,
+      totalPrice: 2878,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1553,
+      totalPrice: 3106,
+      daysInChina: 63,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1553,
+      totalPrice: 3106,
+      daysInChina: 56,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1696,
+      totalPrice: 3391,
+      daysInChina: 56,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "14h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1696,
+      totalPrice: 3391,
+      daysInChina: 49,
+      departTime: "11:40 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 50m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空（最低价）",
+      airlineCode: "XX",
+      departDate: "6月29日（周一）",
+      returnDate: "9月1日（周二）",
+      pricePerPerson: 1328,
+      totalPrice2Pax: 2655,
+      daysInChina: 64,
+      cabinNote: "经济舱，2人总价 $2,655，具体航班待确认（Google Flights 最低价）",
+      warning: "⚠️ 注意：此价格可能为多经停航班，建议在 Google Flights 上确认具体航班和中转时间",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA2LTI5agcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDktMDFqBwgBEgNQVkdyBwgBEgNTRUFAAUACSAFwAYIBCwj___________8BmAEB&hl=en&curr=USD",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空（最低价）",
+      airlineCode: "XX",
+      departDate: "7月13日（周一）",
+      returnDate: "8月29日（周六）",
+      pricePerPerson: 1331,
+      totalPrice2Pax: 2661,
+      daysInChina: 47,
+      cabinNote: "经济舱，2人总价 $2,661，具体航班待确认（Google Flights 最低价）",
+      warning: "⚠️ 注意：此价格可能为多经停航班，建议在 Google Flights 上确认具体航班和中转时间",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA3LTEzagcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjlqBwgBEgNQVkdyBwgBEgNTRUFAAUACSAFwAYIBCwj___________8BmAEB&hl=en&curr=USD",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空（最低价）",
+      airlineCode: "XX",
+      departDate: "7月13日（周一）",
+      returnDate: "8月28日（周五）",
+      pricePerPerson: 1370,
+      totalPrice2Pax: 2739,
+      daysInChina: 46,
+      cabinNote: "经济舱，2人总价 $2,739，具体航班待确认（Google Flights 最低价）",
+      warning: "⚠️ 注意：此价格可能为多经停航班，建议在 Google Flights 上确认具体航班和中转时间",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA3LTEzagcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDgtMjhqBwgBEgNQVkdyBwgBEgNTRUFAAUACSAFwAYIBCwj___________8BmAEB&hl=en&curr=USD",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "多家航空（最低价）",
+      airlineCode: "XX",
+      departDate: "6月28日（周日）",
+      returnDate: "9月1日（周二）",
+      pricePerPerson: 1381,
+      totalPrice2Pax: 2762,
+      daysInChina: 65,
+      cabinNote: "经济舱，2人总价 $2,762，具体航班待确认（Google Flights 最低价）",
+      warning: "⚠️ 注意：此价格可能为多经停航班，建议在 Google Flights 上确认具体航班和中转时间",
+      bookingUrl: "https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA2LTI4agcIARIDU0VBcgcIARIDUFZHGh4SCjIwMjYtMDktMDFqBwgBEgNQVkdyBwgBEgNTRUFAAUACSAFwAYIBCwj___________8BmAEB&hl=en&curr=USD",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1439,
+      totalPrice2Pax: 2878,
+      daysInChina: 49,
+      cabinNote: "经济舱，直飞无经停，约13h50m，含2件托运行李，Kayak查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-27/2adults?sort=price_a",
+    },
+  ],
+};
 
 
-// 最新查询：2026年6月2日 08:17 PST
+
+// 历史查询：2026年6月2日 08:17 PST
 const query_2026_06_02_0817: QueryResult = {
   id: "2026-06-02 08:17",
   queryDate: "2026-06-02",
   queryDateLabel: "2026年6月2日 08:17 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -8075,6 +8259,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_06_03_0834,
   query_2026_06_02_0817,
   query_2026_05_31_0804,
   query_2026_05_30_0815,
@@ -8118,4 +8303,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_06_02_0817;
+export const latestQueryResult = query_2026_06_03_0834;
