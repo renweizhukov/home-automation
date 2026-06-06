@@ -132,12 +132,238 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
-// 最新查询：2026年6月4日 08:16 PST
+// 最新查询：2026年6月6日 08:23 PST
+const query_2026_06_06_0823: QueryResult = {
+  id: "2026-06-06 08:23",
+  queryDate: "2026-06-06",
+  queryDateLabel: "2026年6月6日 08:23 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空（Delta Air Lines）直飞",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: [
+      "Jun 20", "Jun 21", "Jun 22", "Jun 23", "Jun 24", "Jun 25", "Jun 26",
+      "Jun 28", "Jun 29", "Jun 30", "Jul 1", "Jul 2", "Jul 3", "Jul 4",
+      "Jul 5", "Jul 6", "Jul 7", "Jul 8", "Jul 9", "Jul 10", "Jul 11",
+      "Jul 12", "Jul 13", "Jul 14", "Jul 15", "Jul 16", "Jul 17", "Jul 18",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 21", "Aug 22", "Aug 23", "Aug 24", "Aug 25", "Aug 26", "Aug 27", "Aug 28",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Delta官网灵活日期查询（直飞），2026年6月6日查询，每人价格
+    // 最低价（≥45天）：$1,498/人（多个日期组合→Aug 22，直飞），2人共 $2,996
+    // 注：Aug 22返程距Jun 20出发=63天，距Jul 2出发=51天，距Jul 8/9出发=44/43天（不满足45天）
+    prices: [
+      // Jun 20 (Sat): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,193, Aug 23=$2,243, Aug 24=$2,227, Aug 25=$2,193, Aug 26=$2,193, Aug 27=null, Aug 28=null
+      [null, null, 2193, 2243, 2227, 2193, 2193, null, null],
+      // Jun 21 (Sun): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,011, Aug 23=$2,227, Aug 24=$2,011, Aug 25=$2,011, Aug 26=$2,011, Aug 27=null, Aug 28=null
+      [null, null, 2011, 2227, 2011, 2011, 2011, null, null],
+      // Jun 22 (Mon): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,177, Aug 23=$2,193, Aug 24=$2,177, Aug 25=$2,143, Aug 26=$2,143, Aug 27=null, Aug 28=null
+      [null, null, 2177, 2193, 2177, 2143, 2143, null, null],
+      // Jun 23 (Tue): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,011, Aug 23=$2,193, Aug 24=$2,011, Aug 25=$2,011, Aug 26=$2,011, Aug 27=null, Aug 28=null
+      [null, null, 2011, 2193, 2011, 2011, 2011, null, null],
+      // Jun 24 (Wed): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,011, Aug 23=$2,193, Aug 24=$2,011, Aug 25=$2,011, Aug 26=$2,011, Aug 27=null, Aug 28=null
+      [null, null, 2011, 2193, 2011, 2011, 2011, null, null],
+      // Jun 25 (Thu): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,011, Aug 23=$2,193, Aug 24=$2,011, Aug 25=$2,011, Aug 26=$2,011, Aug 27=null, Aug 28=null
+      [null, null, 2011, 2193, 2011, 2011, 2011, null, null],
+      // Jun 26 (Fri): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$2,011, Aug 23=$2,227, Aug 24=$2,011, Aug 25=$2,011, Aug 26=$2,011, Aug 27=null, Aug 28=null
+      [null, null, 2011, 2227, 2011, 2011, 2011, null, null],
+      // Jun 28 (Sun): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,548, Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, 1548, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jun 29 (Mon): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,657, Aug 23=$1,810, Aug 24=$1,728, Aug 25=$1,760, Aug 26=$1,678, Aug 27=$1,678, Aug 28=$1,728
+      [null, null, 1657, 1810, 1728, 1760, 1678, 1678, 1728],
+      // Jun 30 (Tue): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,657, Aug 23=$1,810, Aug 24=$1,728, Aug 25=$1,760, Aug 26=$1,678, Aug 27=$1,678, Aug 28=$1,728
+      [null, null, 1657, 1810, 1728, 1760, 1678, 1678, 1728],
+      // Jul 1 (Wed): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,657, Aug 23=$1,810, Aug 24=$1,728, Aug 25=$1,760, Aug 26=$1,678, Aug 27=$1,678, Aug 28=$1,728
+      [null, null, 1657, 1810, 1728, 1760, 1678, 1678, 1728],
+      // Jul 2 (Thu): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,498, Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, 1498, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 3 (Fri): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,548, Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, 1548, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 4 (Sat): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,707, Aug 23=$1,860, Aug 24=$1,778, Aug 25=$1,810, Aug 26=$1,728, Aug 27=$1,728, Aug 28=$1,778
+      [null, null, 1707, 1860, 1778, 1810, 1728, 1728, 1778],
+      // Jul 5 (Sun): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,548, Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, 1548, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 6 (Mon): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,498, Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, 1498, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 7 (Tue): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,657, Aug 23=$1,810, Aug 24=$1,728, Aug 25=$1,760, Aug 26=$1,678, Aug 27=$1,678, Aug 28=$1,728
+      [null, null, 1657, 1810, 1728, 1760, 1678, 1678, 1728],
+      // Jul 8 (Wed): Aug 20=null(<45), Aug 21=null(<45), Aug 22=$1,498, Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, 1498, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 9 (Thu): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<44天), Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, null, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 10 (Fri): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<43天), Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, null, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 11 (Sat): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<42天), Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, null, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 12 (Sun): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<41天), Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, null, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 13 (Mon): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<40天), Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, null, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 14 (Tue): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<39天), Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, null, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 15 (Wed): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<38天), Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, null, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 16 (Thu): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<37天), Aug 23=$1,651, Aug 24=$1,569, Aug 25=$1,601, Aug 26=$1,519, Aug 27=$1,519, Aug 28=$1,569
+      [null, null, null, 1651, 1569, 1601, 1519, 1519, 1569],
+      // Jul 17 (Fri): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<36天), Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, null, 1701, 1619, 1651, 1569, 1569, 1619],
+      // Jul 18 (Sat): Aug 20=null(<45), Aug 21=null(<45), Aug 22=null(<35天), Aug 23=$1,701, Aug 24=$1,619, Aug 25=$1,651, Aug 26=$1,569, Aug 27=$1,569, Aug 28=$1,619
+      [null, null, null, 1701, 1619, 1651, 1569, 1569, 1619],
+    ],
+    note: "价格来源：达美航空官网灵活日期查询（直飞 SEA→PVG），2026年6月6日查询，每人价格（1成人+1儿童10岁）。最低价（≥45天）：$1,498/人（Jul 2/6/8→Aug 22，直飞约12h30m），2人共 $2,996。次低价：$1,519/人（多个日期→Aug 26/27，直飞），2人共 $3,038。早出发最低：$2,011/人（Jun 21/23-26→Aug 22/24-26，直飞），2人共 $4,022。注：Delta直飞含1件托运行李（Main舱），Basic Economy不含托运行李。⚠️ 价格为Delta直飞，不含其他航空公司选项；如需更低价格请参考重庆航线数据",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-10",
+      departDateLabel: "7月10日（周五）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1116,
+      totalPrice: 2232,
+      daysInChina: 48,
+      departTime: "Kayak 最低价（国泰航空2经停SFO+HKG）",
+      returnTime: "国泰航空+阿拉斯加航空 2经停HKG+LAX",
+      flightDuration: "28h 28m / 24h 39m",
+    },
+    {
+      departDate: "2026-07-03",
+      departDateLabel: "7月3日（周五）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1281,
+      totalPrice: 2562,
+      daysInChina: 55,
+      departTime: "阿拉斯加+韩亚航空 1经停ICN（4h30m）",
+      returnTime: "国泰航空+阿拉斯加 2经停HKG+SFO",
+      flightDuration: "20h 10m / 36h 11m",
+    },
+    {
+      departDate: "2026-06-26",
+      departDateLabel: "6月26日（周五）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1342,
+      totalPrice: 2683,
+      daysInChina: 55,
+      departTime: "卡塔尔航空 2经停SFO+DOH（51h28m）",
+      returnTime: "卡塔尔航空 1经停DOH（25h35m）",
+      flightDuration: "51h 28m / 25h 35m",
+    },
+    {
+      departDate: "2026-07-03",
+      departDateLabel: "7月3日（周五）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1398,
+      totalPrice: 2795,
+      daysInChina: 48,
+      departTime: "阿拉斯加+韩亚航空 1经停ICN（4h30m）",
+      returnTime: "卡塔尔航空 1经停DOH（25h35m）",
+      flightDuration: "20h 10m / 25h 35m",
+    },
+    {
+      departDate: "2026-06-26",
+      departDateLabel: "6月26日（周五）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1398,
+      totalPrice: 2795,
+      daysInChina: 62,
+      departTime: "阿拉斯加+韩亚航空 1经停ICN（4h30m）",
+      returnTime: "卡塔尔航空 1经停DOH（25h35m）",
+      flightDuration: "20h 10m / 25h 35m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "国泰航空（Cathay Pacific）2经停",
+      airlineCode: "CX",
+      departDate: "7月10日（周五）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1116,
+      totalPrice2Pax: 2232,
+      daysInChina: 48,
+      cabinNote: "经济舱，2经停旧金山+香港（SFO+HKG），约28h28m；返程2经停HKG+LAX，约24h39m；Kayak查询",
+      warning: "⚠️ 注意：海南航空直飞本次查询无票，此为国泰航空最低价多经停方案，中转时间较长",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-10/2026-08-27/2adults?sort=price_a",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月2日（周四）",
+      returnDate: "8月22日（周六）",
+      pricePerPerson: 1498,
+      totalPrice2Pax: 2996,
+      daysInChina: 51,
+      cabinNote: "经济舱，直飞无经停，约12h30m，Delta官网灵活日期查询最低价",
+      bookingUrl: "https://www.delta.com/us/en/flight-search/book-a-flight",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月6日（周一）",
+      returnDate: "8月22日（周六）",
+      pricePerPerson: 1498,
+      totalPrice2Pax: 2996,
+      daysInChina: 47,
+      cabinNote: "经济舱，直飞无经停，约12h30m，Delta官网灵活日期查询最低价（同价位多日期可选）",
+      bookingUrl: "https://www.delta.com/us/en/flight-search/book-a-flight",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "阿拉斯加+韩亚航空 1经停首尔",
+      airlineCode: "AS+OZ",
+      departDate: "7月3日（周五）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1281,
+      totalPrice2Pax: 2562,
+      daysInChina: 55,
+      cabinNote: "经济舱，1经停首尔仁川（ICN 4h30m），约20h10m；返程2经停HKG+SFO，约36h；Kayak查询",
+      warning: "⚠️ 注意：返程经停时间较长（HKG+SFO共约38h），建议确认具体中转时间",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-03/2026-08-27/2adults?sort=price_a",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月2日（周四）",
+      returnDate: "8月26日（周三）",
+      pricePerPerson: 1519,
+      totalPrice2Pax: 3038,
+      daysInChina: 55,
+      cabinNote: "经济舱，直飞无经停，约12h30m，Delta官网灵活日期查询",
+      bookingUrl: "https://www.delta.com/us/en/flight-search/book-a-flight",
+    },
+  ],
+};
+
+// 历史查询：2026年6月4日 08:16 PST
 const query_2026_06_04_0816: QueryResult = {
   id: "2026-06-04 08:16",
   queryDate: "2026-06-04",
   queryDateLabel: "2026年6月4日 08:16 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -8457,6 +8683,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_06_06_0823,
   query_2026_06_04_0816,
   query_2026_06_03_0834,
   query_2026_06_02_0817,
@@ -8502,4 +8729,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_06_04_0816;
+export const latestQueryResult = query_2026_06_06_0823;
