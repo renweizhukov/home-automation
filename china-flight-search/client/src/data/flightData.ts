@@ -132,12 +132,167 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
-// 最新查询：2026年6月8日 08:24 PST
+// 最新查询：2026年6月9日 08:30 PST
+const query_2026_06_09_0830: QueryResult = {
+  id: "2026-06-09 08:30",
+  queryDate: "2026-06-09",
+  queryDateLabel: "2026年6月9日 08:30 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空（Delta Air Lines）直飞",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: [
+      "Jun 20", "Jun 23", "Jun 27", "Jul 2", "Jul 4", "Jul 9", "Jul 11",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 22", "Aug 23", "Aug 27", "Sep 1",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak达美航空直飞筛选（SEA→PVG），2026年6月9日查询，每人价格
+    // 最低价（≥45天）：$1,657/人（Jul 2→Aug 22，直飞），2人共 $3,314
+    // 注：Jun 20→Aug 20=61天，Jun 23→Aug 20=58天，Jun 27→Aug 20=54天，Jul 2→Aug 20=49天，Jul 4→Aug 20=47天，Jul 9→Aug 20=42天(<45天)
+    prices: [
+      // Jun 20: Aug 20=null(no DL data), Aug 22=$2,193, Aug 23=null, Aug 27=null, Sep 1=null
+      [null, 2193, null, null, null],
+      // Jun 23: Aug 20=null, Aug 22=$2,193, Aug 23=null, Aug 27=null, Sep 1=null
+      [null, 2193, null, null, null],
+      // Jun 27: Aug 20=null, Aug 22=$2,011, Aug 23=null, Aug 27=null, Sep 1=null
+      [null, 2011, null, null, null],
+      // Jul 2: Aug 20=null(<45), Aug 22=$1,657, Aug 23=null, Aug 27=null, Sep 1=null
+      [null, 1657, null, null, null],
+      // Jul 4: Aug 20=$1,907, Aug 22=null, Aug 23=null, Aug 27=null, Sep 1=null
+      [1907, null, null, null, null],
+      // Jul 9: Aug 20=null(<42天), Aug 22=null(<44天), Aug 23=null(<45天), Aug 27=$1,440, Sep 1=null
+      [null, null, null, 1440, null],
+      // Jul 11: Aug 20=null(<45), Aug 22=null, Aug 23=null, Aug 27=null, Sep 1=null
+      [null, null, null, null, null],
+    ],
+    note: "价格来源：Kayak达美航空直飞筛选（SEA→PVG），2026年6月9日查询，每人价格（1成人+1儿童10岁）。最低价（≥45天）：$1,657/人（Jul 2→Aug 22，直飞约12h30m），2人共 $3,314。早出发最低：$2,011/人（Jun 27→Aug 22，直飞），2人共 $4,022。注：Delta直飞含1件托运行李（Main舱），Basic Economy不含托运行李。⚠️ 与上次查询相比，Delta直飞价格有所下降（上次最低$1,907/人，本次$1,657/人）；建议参考重庆海南航空直飞方案",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-06-25",
+      departDateLabel: "6月25日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1359,
+      totalPrice: 2718,
+      daysInChina: 56,
+      departTime: "11:55 SEA → 次日 17:05 CKG",
+      returnTime: "13:00 CKG → 10:20 SEA",
+      flightDuration: "14h 10m / 12h 20m",
+    },
+    {
+      departDate: "2026-07-09",
+      departDateLabel: "7月9日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1359,
+      totalPrice: 2718,
+      daysInChina: 42,
+      departTime: "12:20 SEA → 次日 17:05 CKG",
+      returnTime: "13:00 CKG → 10:20 SEA",
+      flightDuration: "13h 45m / 12h 20m",
+    },
+    {
+      departDate: "2026-07-02",
+      departDateLabel: "7月2日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1375,
+      totalPrice: 2750,
+      daysInChina: 49,
+      departTime: "12:20 SEA → 次日 17:05 CKG",
+      returnTime: "13:00 CKG → 10:20 SEA",
+      flightDuration: "13h 45m / 12h 20m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "6月25日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1359,
+      totalPrice2Pax: 2718,
+      daysInChina: 56,
+      cabinNote: "经济舱，直飞无经停，约14h10m去/12h20m返，含2件托运行李；Kayak查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-06-25/2026-08-20/2adults/children-10?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月9日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1359,
+      totalPrice2Pax: 2718,
+      daysInChina: 42,
+      cabinNote: "经济舱，直飞无经停，约13h45m去/12h20m返，含2件托运行李；Kayak查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-09/2026-08-20/2adults/children-10?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月2日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1375,
+      totalPrice2Pax: 2750,
+      daysInChina: 49,
+      cabinNote: "经济舱，直飞无经停，约13h45m去/12h20m返，含2件托运行李；Kayak查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-02/2026-08-20/2adults/children-10?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月2日（周四）",
+      returnDate: "8月22日（周六）",
+      pricePerPerson: 1657,
+      totalPrice2Pax: 3314,
+      daysInChina: 51,
+      cabinNote: "经济舱，直飞无经停，约12h30m，Delta Main Basic；Kayak查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-02/2026-08-22/2adults/children-10?sort=price_a&fs=airlines=DL;stops=0",
+    },
+    {
+      rank: 5,
+      medal: "5️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月9日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1440,
+      totalPrice2Pax: 2880,
+      daysInChina: 49,
+      cabinNote: "经济舱，直飞无经停，约12h30m，Delta Main Basic；Kayak查询（上次查询数据）",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-09/2026-08-27/2adults/children-10?sort=price_a&fs=airlines=DL;stops=0",
+    },
+  ],
+};
+
+// 历史查询：2026年6月8日 08:24 PST
 const query_2026_06_08_0824: QueryResult = {
   id: "2026-06-08 08:24",
   queryDate: "2026-06-08",
   queryDateLabel: "2026年6月8日 08:24 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -8874,6 +9029,7 @@ const query_2026_02_22_1301: QueryResult = {
 // ============================================================
 
 export const allQueryResults: QueryResult[] = [
+  query_2026_06_09_0830,
   query_2026_06_08_0824,
   query_2026_06_06_0823,
   query_2026_06_04_0816,
@@ -8921,4 +9077,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_06_08_0824;
+export const latestQueryResult = query_2026_06_09_0830;
