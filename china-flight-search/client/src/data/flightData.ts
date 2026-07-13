@@ -132,12 +132,131 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
-// 最新查询：2026年7月12日 08:01 PST
+// 最新查询：2026年7月13日 08:33 PST
+const query_2026_07_13_0833: QueryResult = {
+  id: "2026-07-13 08:33",
+  queryDate: "2026-07-13",
+  queryDateLabel: "2026年7月13日 08:33 PST",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空（Delta Air Lines）直飞",
+    flightNumber: "DL 287 / DL 288",
+    departureTimes: [
+      "Jul 15",
+    ],
+    returnTimes: [
+      "Aug 20", "Aug 27",
+    ],
+    // prices[departIdx][returnIdx], null = 无数据/不满足45天间隔
+    // 数据来源：Kayak Delta直飞筛选（SEA→PVG），2026年7月13日查询，2人总价
+    prices: [
+      // Jul 15: Aug 20=$3,295（直飞）, Aug 27=$2,977（直飞）
+      [3295, 2977],
+    ],
+    note: "价格来源：Kayak Delta直飞筛选（SEA→PVG），2026年7月13日查询，2人总价（1成人+1儿童10岁）。Delta直飞（DL 287/288）：4:20pm SEA出发，次日7:50pm抵PVG（12h30m）；返程5:30pm PVG→1:58pm SEA（11h28m）。Jul 15→Aug 20=$3,295（$1,648/人，36天在华）；Jul 15→Aug 27=$2,977（$1,489/人，43天在华）。注：出发窗口内所有周四（6/25、7/2、7/9）均已过期，仅查询窗口末日7月15日（周三）。海南航空SEA→CKG：Jul 16→Aug 20=$2,555/2人（$1,278/人，35天）；Jul 16→Aug 27=$2,846/2人（$1,423/人，42天）。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-16",
+      departDateLabel: "7月16日（周四）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 1278,
+      totalPrice: 2555,
+      daysInChina: 35,
+      departTime: "12:20 SEA → 次日 17:05 CKG",
+      returnTime: "13:00 CKG → 10:20 SEA",
+      flightDuration: "13h 45m / 12h 20m",
+    },
+    {
+      departDate: "2026-07-16",
+      departDateLabel: "7月16日（周四）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 1423,
+      totalPrice: 2846,
+      daysInChina: 42,
+      departTime: "12:20 SEA → 次日 17:05 CKG",
+      returnTime: "13:00 CKG → 10:20 SEA",
+      flightDuration: "13h 45m / 12h 20m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月16日（周四）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1278,
+      totalPrice2Pax: 2555,
+      daysInChina: 35,
+      cabinNote: "经济舱，双向直飞，去程13h45m/返程12h20m，含2件托运行李；Kayak查询；2人含税总价$2,555",
+      warning: "在华仅35天，低于45天建议最小值",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-16/2026-08-20/1adults/children-10?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月16日（周四）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1423,
+      totalPrice2Pax: 2846,
+      daysInChina: 42,
+      cabinNote: "经济舱，双向直飞，去程13h45m/返程12h20m，含2件托运行李；Kayak查询；2人含税总价$2,846",
+      warning: "在华仅42天，低于45天建议最小值",
+      bookingUrl: "https://www.kayak.com/flights/SEA-CKG/2026-07-16/2026-08-27/1adults/children-10?sort=price_a&fs=airlines=HU",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月15日（周三）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 1489,
+      totalPrice2Pax: 2977,
+      daysInChina: 43,
+      cabinNote: "经济舱，双向直飞，去程12h30m/返程11h28m，Delta Economy Cabin；Kayak查询；2人含税总价$2,977",
+      warning: "在华仅43天，低于45天建议最小值",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-15/2026-08-27/1adults/children-10?sort=price_a&fs=airlines=DL",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta）直飞",
+      airlineCode: "DL",
+      departDate: "7月15日（周三）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 1648,
+      totalPrice2Pax: 3295,
+      daysInChina: 36,
+      cabinNote: "经济舱，双向直飞，去程12h30m/返程11h28m，Delta Economy Cabin；Kayak查询；2人含税总价$3,295",
+      warning: "在华仅36天，低于45天建议最小值",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-15/2026-08-20/1adults/children-10?sort=price_a&fs=airlines=DL",
+    },
+  ],
+};
+
+// 历史查询：2026年7月12日 08:01 PST
 const query_2026_07_12_0801: QueryResult = {
   id: "2026-07-12 08:01",
   queryDate: "2026-07-12",
   queryDateLabel: "2026年7月12日 08:01 PST",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -13591,6 +13710,7 @@ const query_2026_06_22_0802: QueryResult = {
 // 导出
 // ============================================================
 export const allQueryResults: QueryResult[] = [
+  query_2026_07_13_0833,
   query_2026_07_12_0801,
   query_2026_07_07_0813,
   query_2026_07_06_0803,
@@ -13664,4 +13784,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_07_12_0801;
+export const latestQueryResult = query_2026_07_13_0833;
