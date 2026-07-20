@@ -132,12 +132,36 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
+// 最新查询：2026年7月20日 08:05 PDT
+const query_2026_07_20_0805: QueryResult = {
+  id: "2026-07-20 08:05",
+  queryDate: "2026-07-20",
+  queryDateLabel: "2026年7月20日 08:05",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空（Delta Air Lines）直飞",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: [],
+    returnTimes: [],
+    prices: [],
+    note: "2026年7月20日 08:05 PDT查询。请求的出发窗口（6月20日至7月15日）在查询时已全部过期。Delta官网订票页不允许选择这些过去日期，因此无法对任何中心日期组合提取当前可订的7×7灵活日期价格矩阵。为避免沿用历史价格或编造报价，本次达美日期与价格矩阵留空。",
+  },
+  chongqingResults: [],
+  topRecommendations: [],
+};
+
 // 最新查询：2026年7月19日 08:05 PDT
 const query_2026_07_19_0805: QueryResult = {
   id: "2026-07-19 08:05",
   queryDate: "2026-07-19",
   queryDateLabel: "2026年7月19日 08:05",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -14055,6 +14079,7 @@ const query_2026_06_22_0802: QueryResult = {
 // 导出
 // ============================================================
 export const allQueryResults: QueryResult[] = [
+  query_2026_07_20_0805,
   query_2026_07_19_0805,
   query_2026_07_17_0803,
   query_2026_07_16_0802,
@@ -14134,4 +14159,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_07_19_0805;
+export const latestQueryResult = query_2026_07_20_0805;
