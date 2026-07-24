@@ -132,12 +132,134 @@ export const staticTips = [
 // ============================================================
 // 查询结果数据（与查询时间相关）
 // ============================================================
-// 最新查询：2026年7月23日 08:01 PST
+// 最新查询：2026年7月24日 08:11 PST
+const query_2026_07_24_0811: QueryResult = {
+  id: "2026-07-24 08:11",
+  queryDate: "2026-07-24",
+  queryDateLabel: "2026年7月24日 08:11",
+  isLatest: true,
+  searchParams: {
+    origin: "西雅图（SEA）",
+    departWindow: "2026年6月20日 – 7月15日",
+    returnWindow: "2026年8月20日 – 9月1日",
+    passengers: "1位成人 + 1位儿童（10岁）",
+  },
+  shanghaiResults: {
+    airline: "达美航空（Delta Air Lines）直飞",
+    flightNumber: "DL 129 / DL 128",
+    departureTimes: ["Jul 24"],
+    returnTimes: ["Aug 29"],
+    prices: [[3177]],
+    note: "2026年7月24日 08:11 PST查询。原出发窗口（6月20日至7月15日）已全部过期。Delta官网灵活日期搜索页面在沙盒浏览器中持续报错（#SFAF052_444），无法加载7×7价格矩阵。Kayak备用查询（Jul 24出发 / Aug 29返回，达美直飞筛选）显示：$1,589/人，2人总价$3,177，Delta Main Basic舱，去程4:20pm SEA→次日7:50pm PVG（12h30m），返程5:30pm PVG→1:58pm SEA（11h28m），在华36天。",
+  },
+  chongqingResults: [
+    {
+      departDate: "2026-07-31",
+      departDateLabel: "7月31日（周五）",
+      returnDate: "2026-08-20",
+      returnDateLabel: "8月20日（周四）",
+      pricePerPerson: 2200,
+      totalPrice: 4400,
+      daysInChina: 20,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-31",
+      departDateLabel: "7月31日（周五）",
+      returnDate: "2026-08-27",
+      returnDateLabel: "8月27日（周四）",
+      pricePerPerson: 2200,
+      totalPrice: 4400,
+      daysInChina: 27,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 25m / 12h 30m",
+    },
+    {
+      departDate: "2026-07-31",
+      departDateLabel: "7月31日（周五）",
+      returnDate: "2026-09-03",
+      returnDateLabel: "9月3日（周四）",
+      pricePerPerson: 2055,
+      totalPrice: 4110,
+      daysInChina: 34,
+      departTime: "11:05 SEA → 次日 16:30 CKG",
+      returnTime: "12:10 CKG → 09:40 SEA",
+      flightDuration: "13h 25m / 12h 30m",
+    },
+  ],
+  topRecommendations: [
+    {
+      rank: 1,
+      medal: "🥇",
+      route: "SEA → 上海（PVG）",
+      airline: "达美航空（Delta Air Lines）直飞",
+      airlineCode: "DL",
+      departDate: "7月24日（周五）",
+      returnDate: "8月29日（周六）",
+      pricePerPerson: 1589,
+      totalPrice2Pax: 3177,
+      daysInChina: 36,
+      cabinNote: "Delta Main Basic舱，双向直飞，去程12h30m/返程11h28m；Kayak实时查询；2人含税总价$3,177",
+      warning: "出发日期超出原窗口（7月15日截止）；Delta官网灵活日期页面报错，价格来自Kayak备用查询",
+      bookingUrl: "https://www.kayak.com/flights/SEA-PVG/2026-07-24/2026-08-29/1adults/children-10?sort=price_a&fs=airlines=DL;stops=0",
+    },
+    {
+      rank: 2,
+      medal: "🥈",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月31日（周五）",
+      returnDate: "9月3日（周四）",
+      pricePerPerson: 2055,
+      totalPrice2Pax: 4110,
+      daysInChina: 34,
+      cabinNote: "经济舱，双向直飞，去程13h25m/返程12h30m；海南航空官网实时查询；2人含税总价$4,110",
+      warning: "出发日期超出原窗口（7月15日截止）；在华34天，低于45天建议最小值；价格来自海南航空官网日历",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Search",
+    },
+    {
+      rank: 3,
+      medal: "🥉",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月31日（周五）",
+      returnDate: "8月20日（周四）",
+      pricePerPerson: 2200,
+      totalPrice2Pax: 4400,
+      daysInChina: 20,
+      cabinNote: "经济舱，双向直飞，去程13h25m/返程12h30m；海南航空官网实时查询；2人含税总价$4,400",
+      warning: "出发日期超出原窗口（7月15日截止）；在华20天，低于45天建议最小值；价格来自海南航空官网日历",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Search",
+    },
+    {
+      rank: 4,
+      medal: "4️⃣",
+      route: "SEA → 重庆（CKG）",
+      airline: "海南航空（Hainan Airlines）直飞",
+      airlineCode: "HU",
+      departDate: "7月31日（周五）",
+      returnDate: "8月27日（周四）",
+      pricePerPerson: 2200,
+      totalPrice2Pax: 4400,
+      daysInChina: 27,
+      cabinNote: "经济舱，双向直飞，去程13h25m/返程12h30m；海南航空官网实时查询；2人含税总价$4,400",
+      warning: "出发日期超出原窗口（7月15日截止）；在华27天，低于45天建议最小值；价格来自海南航空官网日历",
+      bookingUrl: "https://www.hainanairlines.com/US/CN/Search",
+    },
+  ],
+};
+
+// 历史查询：2026年7月23日 08:01 PST
 const query_2026_07_23_0801: QueryResult = {
   id: "2026-07-23 08:01",
   queryDate: "2026-07-23",
   queryDateLabel: "2026年7月23日 08:01",
-  isLatest: true,
+  isLatest: false,
   searchParams: {
     origin: "西雅图（SEA）",
     departWindow: "2026年6月20日 – 7月15日",
@@ -14479,6 +14601,7 @@ const query_2026_06_22_0802: QueryResult = {
 // 导出
 // ============================================================
 export const allQueryResults: QueryResult[] = [
+  query_2026_07_24_0811,
   query_2026_07_23_0801,
   query_2026_07_22_0805,
   query_2026_07_21_0804,
@@ -14562,4 +14685,4 @@ export const allQueryResults: QueryResult[] = [
   query_2026_02_22_1301,
 ];
 
-export const latestQueryResult = query_2026_07_23_0801;
+export const latestQueryResult = query_2026_07_24_0811;
